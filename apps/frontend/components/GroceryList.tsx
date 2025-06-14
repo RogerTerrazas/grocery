@@ -1,27 +1,30 @@
-import React from "react";
-import { Text, View, XStack, useTheme, YStack, Button } from "tamagui";
+import React, { useState } from "react";
+import { Text, View, XStack, useTheme, YStack, Button, Input } from "tamagui";
 import { trpc } from "../utils/trpc";
 
 export const GroceryList = () => {
   const theme = useTheme();
+  const [newItemName, setNewItemName] = useState("");
+
   const groceriesQuery = trpc.groceries.getAll.useQuery();
   const toggleInCartMutation = trpc.groceries.toggleInCart.useMutation({
     onSuccess: () => groceriesQuery.refetch(),
   });
+  const createItemMutation = trpc.groceries.create.useMutation({
+    onSuccess: () => {
+      groceriesQuery.refetch();
+      setNewItemName("");
+    },
+  });
 
-  const groupedGroceries = React.useMemo(() => {
-    if (!groceriesQuery.data) return {};
-    return groceriesQuery.data.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = [];
-      }
-      acc[item.category].push(item);
-      return acc;
-    }, {} as Record<string, typeof groceriesQuery.data>);
-  }, [groceriesQuery.data]);
-
-  const handleToggleInCart = (id: string) => {
+  const handleToggleInCart = (id: number) => {
     toggleInCartMutation.mutate({ id });
+  };
+
+  const handleCreateItem = () => {
+    if (newItemName.trim()) {
+      createItemMutation.mutate({ name: newItemName.trim() });
+    }
   };
 
   if (groceriesQuery.isLoading || groceriesQuery.error) {
@@ -41,63 +44,69 @@ export const GroceryList = () => {
 
   return (
     <YStack style={{ padding: 8, gap: 8, flex: 1 }}>
+      {/* Add new item form */}
+      <XStack style={{ gap: 8, alignItems: "center" }}>
+        <Input
+          flex={1}
+          placeholder="Add new grocery item..."
+          value={newItemName}
+          onChangeText={setNewItemName}
+          onSubmitEditing={handleCreateItem}
+        />
+        <Button
+          onPress={handleCreateItem}
+          disabled={!newItemName.trim() || createItemMutation.isPending}
+        >
+          {createItemMutation.isPending ? "Adding..." : "Add"}
+        </Button>
+      </XStack>
+
+      {/* Grocery items list */}
       <YStack style={{ gap: 8, overflow: "auto", flex: 1 }}>
-        {Object.entries(groupedGroceries).map(([category, items]) => (
-          <YStack key={category} style={{ gap: 4 }}>
-            <Text style={{ fontSize: 14, opacity: 0.7, fontWeight: "600" }}>
-              {category}
+        {groceriesQuery.data?.map((item) => (
+          <XStack
+            key={item.id}
+            style={{
+              padding: 8,
+              gap: 8,
+              alignItems: "center",
+              backgroundColor: theme.background.get(),
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: theme.borderColor.get(),
+              marginBottom: 2,
+            }}
+            onPress={() => handleToggleInCart(item.id)}
+            pressStyle={{ opacity: 0.7 }}
+          >
+            <View
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 2,
+                borderWidth: 1,
+                borderColor: theme.borderColorHover?.get() || "#ccc",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: item.inCart ? "#007bff" : "transparent",
+              }}
+            >
+              {item.inCart && (
+                <Text style={{ color: "white", fontSize: 10 }}>✓</Text>
+              )}
+            </View>
+
+            <Text
+              style={{
+                fontSize: 13,
+                opacity: item.inCart ? 0.6 : 1,
+                textDecorationLine: item.inCart ? "line-through" : "none",
+                flex: 1,
+              }}
+            >
+              {item.name}
             </Text>
-
-            {items.map((item) => (
-              <XStack
-                key={item.id}
-                style={{
-                  padding: 8,
-                  gap: 8,
-                  alignItems: "center",
-                  backgroundColor: theme.background.get(),
-                  borderRadius: 4,
-                  borderWidth: 1,
-                  borderColor: theme.borderColor.get(),
-                  marginBottom: 2,
-                }}
-                onPress={() => handleToggleInCart(item.id)}
-                pressStyle={{ opacity: 0.7 }}
-              >
-                <View
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: 2,
-                    borderWidth: 1,
-                    borderColor: theme.borderColorHover?.get() || "#ccc",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: item.inCart ? "#007bff" : "transparent",
-                  }}
-                >
-                  {item.inCart && (
-                    <Text style={{ color: "white", fontSize: 10 }}>✓</Text>
-                  )}
-                </View>
-
-                <YStack style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      opacity: item.inCart ? 0.6 : 1,
-                      textDecorationLine: item.inCart ? "line-through" : "none",
-                    }}
-                  >
-                    {item.name}
-                  </Text>
-                  <Text style={{ fontSize: 11, color: "#707070" }}>
-                    {item.quantity} {item.unit}
-                  </Text>
-                </YStack>
-              </XStack>
-            ))}
-          </YStack>
+          </XStack>
         ))}
       </YStack>
     </YStack>

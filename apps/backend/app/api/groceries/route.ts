@@ -1,81 +1,7 @@
 import { NextResponse } from "next/server";
-
-// Mock grocery list data
-interface GroceryItem {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  unit: string;
-  inCart: boolean;
-}
-
-const groceryItems: GroceryItem[] = [
-  {
-    id: "1",
-    name: "Milk",
-    category: "Dairy",
-    quantity: 1,
-    unit: "gallon",
-    inCart: false,
-  },
-  {
-    id: "2",
-    name: "Eggs",
-    category: "Dairy",
-    quantity: 12,
-    unit: "count",
-    inCart: true,
-  },
-  {
-    id: "3",
-    name: "Bread",
-    category: "Bakery",
-    quantity: 1,
-    unit: "loaf",
-    inCart: false,
-  },
-  {
-    id: "4",
-    name: "Apples",
-    category: "Produce",
-    quantity: 5,
-    unit: "count",
-    inCart: false,
-  },
-  {
-    id: "5",
-    name: "Chicken Breast",
-    category: "Meat",
-    quantity: 2,
-    unit: "lbs",
-    inCart: true,
-  },
-  {
-    id: "6",
-    name: "Pasta",
-    category: "Dry Goods",
-    quantity: 1,
-    unit: "box",
-    inCart: false,
-  },
-  {
-    id: "7",
-    name: "Tomatoes",
-    category: "Produce",
-    quantity: 4,
-    unit: "count",
-    inCart: false,
-  },
-  {
-    id: "8",
-    name: "Cheese",
-    category: "Dairy",
-    quantity: 1,
-    unit: "block",
-    inCart: true,
-  },
-];
+import { db } from "../../../db";
+import { groceryLists } from "../../../db/schema";
+import { eq } from "drizzle-orm";
 
 // CORS headers
 const corsHeaders = {
@@ -91,23 +17,36 @@ export async function OPTIONS() {
 
 // GET all grocery items
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
 
-  // If ID is provided, return specific item
-  if (id) {
-    const item = groceryItems.find((item) => item.id === id);
-    if (!item) {
-      return NextResponse.json(
-        { error: "Grocery item not found" },
-        { status: 404, headers: corsHeaders }
-      );
+    // If ID is provided, return specific item
+    if (id) {
+      const items = await db
+        .select()
+        .from(groceryLists)
+        .where(eq(groceryLists.id, parseInt(id)));
+
+      if (items.length === 0) {
+        return NextResponse.json(
+          { error: "Grocery item not found" },
+          { status: 404, headers: corsHeaders }
+        );
+      }
+      return NextResponse.json(items[0], { headers: corsHeaders });
     }
-    return NextResponse.json(item, { headers: corsHeaders });
-  }
 
-  // Otherwise return all items
-  return NextResponse.json(groceryItems, { headers: corsHeaders });
+    // Otherwise return all items
+    const items = await db.select().from(groceryLists);
+    return NextResponse.json(items, { headers: corsHeaders });
+  } catch (error) {
+    console.error("Database error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500, headers: corsHeaders }
+    );
+  }
 }
 
 // POST to toggle inCart status
@@ -123,22 +62,62 @@ export async function POST(request: Request) {
       );
     }
 
-    const item = groceryItems.find((item) => item.id === id);
-    if (!item) {
+    // First, get the current item
+    const items = await db
+      .select()
+      .from(groceryLists)
+      .where(eq(groceryLists.id, parseInt(id)));
+
+    if (items.length === 0) {
       return NextResponse.json(
         { error: "Grocery item not found" },
         { status: 404, headers: corsHeaders }
       );
     }
 
-    // Toggle the inCart status
-    item.inCart = !item.inCart;
+    const currentItem = items[0];
 
-    return NextResponse.json(item, { headers: corsHeaders });
+    // Toggle the inCart status
+    const updatedItems = await db
+      .update(groceryLists)
+      .set({ inCart: !currentItem.inCart })
+      .where(eq(groceryLists.id, parseInt(id)))
+      .returning();
+
+    return NextResponse.json(updatedItems[0], { headers: corsHeaders });
   } catch (error) {
+    console.error("Database error:", error);
     return NextResponse.json(
-      { error: "Invalid request" },
-      { status: 400, headers: corsHeaders }
+      { error: "Internal server error" },
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
+
+// PUT to create a new grocery item
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { name } = body;
+
+    if (!name) {
+      return NextResponse.json(
+        { error: "Name is required" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const newItems = await db
+      .insert(groceryLists)
+      .values({ name, inCart: false })
+      .returning();
+
+    return NextResponse.json(newItems[0], { headers: corsHeaders });
+  } catch (error) {
+    console.error("Database error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500, headers: corsHeaders }
     );
   }
 }
