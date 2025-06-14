@@ -40,69 +40,62 @@ export const GroceryList = () => {
   }
 
   return (
-    <YStack style={{ padding: 16, gap: 16, flex: 1 }}>
-      <YStack style={{ gap: 16, overflow: "auto", flex: 1 }}>
+    <YStack style={{ padding: 8, gap: 8, flex: 1 }}>
+      <YStack style={{ gap: 8, overflow: "auto", flex: 1 }}>
         {Object.entries(groupedGroceries).map(([category, items]) => (
-          <YStack key={category} style={{ gap: 8 }}>
-            <Text style={{ fontSize: 16, opacity: 0.7 }}>{category}</Text>
+          <YStack key={category} style={{ gap: 4 }}>
+            <Text style={{ fontSize: 14, opacity: 0.7, fontWeight: "600" }}>
+              {category}
+            </Text>
 
             {items.map((item) => (
-              <YStack key={item.id} style={{ marginBottom: 8 }}>
-                <XStack
+              <XStack
+                key={item.id}
+                style={{
+                  padding: 8,
+                  gap: 8,
+                  alignItems: "center",
+                  backgroundColor: theme.background.get(),
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  borderColor: theme.borderColor.get(),
+                  marginBottom: 2,
+                }}
+                onPress={() => handleToggleInCart(item.id)}
+                pressStyle={{ opacity: 0.7 }}
+              >
+                <View
                   style={{
-                    padding: 12,
-                    gap: 12,
-                    alignItems: "center",
-                    backgroundColor: theme.background.get(),
-                    borderRadius: 4,
+                    width: 18,
+                    height: 18,
+                    borderRadius: 2,
                     borderWidth: 1,
-                    borderColor: theme.borderColor.get(),
+                    borderColor: theme.borderColorHover?.get() || "#ccc",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: item.inCart ? "#007bff" : "transparent",
                   }}
                 >
-                  <View
+                  {item.inCart && (
+                    <Text style={{ color: "white", fontSize: 10 }}>✓</Text>
+                  )}
+                </View>
+
+                <YStack style={{ flex: 1 }}>
+                  <Text
                     style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 2,
-                      borderWidth: 1,
-                      borderColor: theme.borderColorHover?.get() || "#ccc",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: item.inCart ? "#007bff" : "transparent",
+                      fontSize: 13,
+                      opacity: item.inCart ? 0.6 : 1,
+                      textDecorationLine: item.inCart ? "line-through" : "none",
                     }}
                   >
-                    {item.inCart && <Text style={{ color: "white" }}>✓</Text>}
-                  </View>
-
-                  <YStack style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        opacity: item.inCart ? 0.6 : 1,
-                        textDecorationLine: item.inCart
-                          ? "line-through"
-                          : "none",
-                      }}
-                    >
-                      {item.name}
-                    </Text>
-                    <Text style={{ fontSize: 12, color: "#707070" }}>
-                      {item.quantity} {item.unit}
-                    </Text>
-                  </YStack>
-                </XStack>
-
-                <Button
-                  size="$2"
-                  variant="outlined"
-                  style={{ marginTop: 8 }}
-                  onPress={() => handleToggleInCart(item.id)}
-                >
-                  <Text style={{ fontSize: 12, color: "#707070" }}>
-                    {item.inCart ? "Mark as Not in Cart" : "Add to Cart"}
+                    {item.name}
                   </Text>
-                </Button>
-              </YStack>
+                  <Text style={{ fontSize: 11, color: "#707070" }}>
+                    {item.quantity} {item.unit}
+                  </Text>
+                </YStack>
+              </XStack>
             ))}
           </YStack>
         ))}

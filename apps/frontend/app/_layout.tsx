@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { TamaguiProvider, useTheme } from "tamagui";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { tamaguiConfig } from "../tamagui.config";
 import { trpc } from "../utils/trpc";
@@ -34,13 +35,15 @@ export default function RootLayout() {
   });
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </TamaguiProvider>
-    </trpc.Provider>
+    <SafeAreaProvider>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </TamaguiProvider>
+      </trpc.Provider>
+    </SafeAreaProvider>
   );
 }
