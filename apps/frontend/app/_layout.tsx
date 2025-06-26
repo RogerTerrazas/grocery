@@ -14,11 +14,11 @@ import { QueryClient } from "@tanstack/react-query";
 export default function RootLayout() {
   const queryClient = new QueryClient();
   const colorScheme = useColorScheme();
-  const [theme, setTheme] = useState(colorScheme === "dark" ? "dark" : "light");
+  const [theme, setTheme] = useState("light");
 
   // Update theme when system theme changes
   useEffect(() => {
-    setTheme(colorScheme === "dark" ? "dark" : "light");
+    setTheme("light");
   }, [colorScheme]);
 
   const trpcClient = trpc.createClient({

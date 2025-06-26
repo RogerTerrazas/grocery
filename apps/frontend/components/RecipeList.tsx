@@ -18,7 +18,6 @@ export const RecipeList = () => {
   if (recipesQuery.error) {
     return (
       <YStack style={{ padding: 16, gap: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: "500" }}>Recipes</Text>
         <Text>Error: {recipesQuery.error.message}</Text>
       </YStack>
     );
@@ -26,9 +25,7 @@ export const RecipeList = () => {
 
   return (
     <YStack style={{ flex: 1 }}>
-      <YStack style={{ padding: 16, paddingBottom: 0 }}>
-        <Text style={{ fontSize: 20, fontWeight: "500" }}>Recipes</Text>
-      </YStack>
+      <YStack style={{ padding: 16, paddingBottom: 0 }}></YStack>
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <YStack style={{ padding: 16, paddingTop: 8, gap: 16 }}>
           {recipesQuery.data?.map((recipe) => (
@@ -47,46 +44,24 @@ export const RecipeList = () => {
                 {recipe.name}
               </Text>
 
-              <Text style={{ fontSize: 14, color: "#707070", lineHeight: 20 }}>
-                {recipe.description}
-              </Text>
-
-              <XStack style={{ gap: 16, marginTop: 4 }}>
-                <Text style={{ fontSize: 14, color: "#707070" }}>
-                  Prep: {recipe.prepTime} min
-                </Text>
-                <Text style={{ fontSize: 14, color: "#707070" }}>
-                  Cook: {recipe.cookTime} min
-                </Text>
-                <Text style={{ fontSize: 14, color: "#707070" }}>
-                  Servings: {recipe.servings}
-                </Text>
-              </XStack>
-
               <YStack style={{ gap: 8, marginTop: 12 }}>
                 <Text style={{ fontSize: 16, fontWeight: "500", opacity: 0.8 }}>
-                  Ingredients:
+                  Grocery Items:
                 </Text>
-                {recipe.ingredients.map((ingredient, index) => (
-                  <Text key={index} style={{ fontSize: 14, lineHeight: 20 }}>
-                    • {ingredient.quantity} {ingredient.unit} {ingredient.name}
+                {recipe.groceryItems && recipe.groceryItems.length > 0 ? (
+                  recipe.groceryItems.map((item) => (
+                    <Text
+                      key={item.id}
+                      style={{ fontSize: 14, lineHeight: 20 }}
+                    >
+                      • {item.name}
+                    </Text>
+                  ))
+                ) : (
+                  <Text style={{ fontSize: 14, lineHeight: 20, opacity: 0.6 }}>
+                    No grocery items added yet
                   </Text>
-                ))}
-              </YStack>
-
-              <YStack style={{ gap: 8, marginTop: 12 }}>
-                <Text style={{ fontSize: 16, fontWeight: "500", opacity: 0.8 }}>
-                  Instructions:
-                </Text>
-                {recipe.instructions.map((instruction, index) => (
-                  <Text
-                    key={index}
-                    style={{ fontSize: 14, lineHeight: 20, marginBottom: 4 }}
-                  >
-                    <Text style={{ fontWeight: "500" }}>{index + 1}.</Text>{" "}
-                    {instruction}
-                  </Text>
-                ))}
+                )}
               </YStack>
             </YStack>
           ))}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "../../../db";
-import { groceryLists } from "../../../db/schema";
+import { groceryItems } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 
 // CORS headers
@@ -25,8 +25,8 @@ export async function GET(request: Request) {
     if (id) {
       const items = await db
         .select()
-        .from(groceryLists)
-        .where(eq(groceryLists.id, parseInt(id)));
+        .from(groceryItems)
+        .where(eq(groceryItems.id, parseInt(id)));
 
       if (items.length === 0) {
         return NextResponse.json(
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     }
 
     // Otherwise return all items
-    const items = await db.select().from(groceryLists);
+    const items = await db.select().from(groceryItems);
     return NextResponse.json(items, { headers: corsHeaders });
   } catch (error) {
     console.error("Database error:", error);
@@ -49,11 +49,11 @@ export async function GET(request: Request) {
   }
 }
 
-// POST to toggle inCart status
+// POST to update a grocery item
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { id } = body;
+    const { id, name, recipeId } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -62,27 +62,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // First, get the current item
-    const items = await db
-      .select()
-      .from(groceryLists)
-      .where(eq(groceryLists.id, parseInt(id)));
+    // Update the item
+    const updatedItems = await db
+      .update(groceryItems)
+      .set({
+        ...(name && { name }),
+        ...(recipeId !== undefined && { recipeId }),
+      })
+      .where(eq(groceryItems.id, parseInt(id)))
+      .returning();
 
-    if (items.length === 0) {
+    if (updatedItems.length === 0) {
       return NextResponse.json(
         { error: "Grocery item not found" },
         { status: 404, headers: corsHeaders }
       );
     }
-
-    const currentItem = items[0];
-
-    // Toggle the inCart status
-    const updatedItems = await db
-      .update(groceryLists)
-      .set({ inCart: !currentItem.inCart })
-      .where(eq(groceryLists.id, parseInt(id)))
-      .returning();
 
     return NextResponse.json(updatedItems[0], { headers: corsHeaders });
   } catch (error) {
@@ -98,7 +93,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { name } = body;
+    const { name, recipeId } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -108,11 +103,49 @@ export async function PUT(request: Request) {
     }
 
     const newItems = await db
-      .insert(groceryLists)
-      .values({ name, inCart: false })
+      .insert(groceryItems)
+      .values({
+        name,
+        recipeId: recipeId || null,
+      })
       .returning();
 
     return NextResponse.json(newItems[0], { headers: corsHeaders });
+  } catch (error) {
+    console.error("Database error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
+
+// DELETE to remove a grocery item
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID is required" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const deletedItems = await db
+      .delete(groceryItems)
+      .where(eq(groceryItems.id, parseInt(id)))
+      .returning();
+
+    if (deletedItems.length === 0) {
+      return NextResponse.json(
+        { error: "Grocery item not found" },
+        { status: 404, headers: corsHeaders }
+      );
+    }
+
+    return NextResponse.json(deletedItems[0], { headers: corsHeaders });
   } catch (error) {
     console.error("Database error:", error);
     return NextResponse.json(

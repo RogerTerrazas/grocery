@@ -7,24 +7,24 @@ export const GroceryList = () => {
   const [newItemName, setNewItemName] = useState("");
 
   const groceriesQuery = trpc.groceries.getAll.useQuery();
-  const toggleInCartMutation = trpc.groceries.toggleInCart.useMutation({
-    onSuccess: () => groceriesQuery.refetch(),
-  });
   const createItemMutation = trpc.groceries.create.useMutation({
     onSuccess: () => {
       groceriesQuery.refetch();
       setNewItemName("");
     },
   });
-
-  const handleToggleInCart = (id: number) => {
-    toggleInCartMutation.mutate({ id });
-  };
+  const deleteItemMutation = trpc.groceries.delete.useMutation({
+    onSuccess: () => groceriesQuery.refetch(),
+  });
 
   const handleCreateItem = () => {
     if (newItemName.trim()) {
       createItemMutation.mutate({ name: newItemName.trim() });
     }
+  };
+
+  const handleDeleteItem = (id: number) => {
+    deleteItemMutation.mutate({ id });
   };
 
   if (groceriesQuery.isLoading || groceriesQuery.error) {
@@ -76,36 +76,36 @@ export const GroceryList = () => {
               borderColor: theme.borderColor.get(),
               marginBottom: 2,
             }}
-            onPress={() => handleToggleInCart(item.id)}
-            pressStyle={{ opacity: 0.7 }}
           >
-            <View
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: 2,
-                borderWidth: 1,
-                borderColor: theme.borderColorHover?.get() || "#ccc",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: item.inCart ? "#007bff" : "transparent",
-              }}
-            >
-              {item.inCart && (
-                <Text style={{ color: "white", fontSize: 10 }}>✓</Text>
-              )}
-            </View>
-
             <Text
               style={{
                 fontSize: 13,
-                opacity: item.inCart ? 0.6 : 1,
-                textDecorationLine: item.inCart ? "line-through" : "none",
                 flex: 1,
               }}
             >
               {item.name}
             </Text>
+
+            {item.recipeId && (
+              <Text
+                style={{
+                  fontSize: 11,
+                  opacity: 0.6,
+                  fontStyle: "italic",
+                }}
+              >
+                From recipe
+              </Text>
+            )}
+
+            <Button
+              size="$2"
+              variant="outlined"
+              onPress={() => handleDeleteItem(item.id)}
+              disabled={deleteItemMutation.isPending}
+            >
+              {deleteItemMutation.isPending ? "..." : "×"}
+            </Button>
           </XStack>
         ))}
       </YStack>

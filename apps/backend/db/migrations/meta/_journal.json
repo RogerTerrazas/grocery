@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1750016008000,
+      "tag": "0001_add_ingredients_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1750016400000,
+      "tag": "0002_update_to_grocery_items",
+      "breakpoints": true
+    }
+  ]
+}

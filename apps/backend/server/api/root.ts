@@ -1,30 +1,20 @@
 import { createTRPCRouter, publicProcedure } from "./trpc";
 import { z } from "zod";
 import { db } from "../../db";
-import { groceryLists } from "../../db/schema";
+import { groceryItems, recipes } from "../../db/schema";
 import { eq } from "drizzle-orm";
 
 // Define types for our API responses - updated to match new schema
 interface GroceryItem {
   id: number;
   name: string;
-  inCart: boolean;
+  recipeId?: number | null;
 }
 
 interface Recipe {
-  id: string;
+  id: number;
   name: string;
-  description: string;
-  ingredients: {
-    name: string;
-    quantity: number;
-    unit: string;
-  }[];
-  instructions: string[];
-  prepTime: number;
-  cookTime: number;
-  servings: number;
-  imageUrl: string;
+  groceryItems?: GroceryItem[];
 }
 
 export const appRouter = createTRPCRouter({
@@ -40,7 +30,7 @@ export const appRouter = createTRPCRouter({
 
   groceries: createTRPCRouter({
     getAll: publicProcedure.query(async () => {
-      const items = await db.select().from(groceryLists);
+      const items = await db.select().from(groceryItems);
       return items;
     }),
 
@@ -49,8 +39,8 @@ export const appRouter = createTRPCRouter({
       .query(async ({ input }) => {
         const items = await db
           .select()
-          .from(groceryLists)
-          .where(eq(groceryLists.id, input.id));
+          .from(groceryItems)
+          .where(eq(groceryItems.id, input.id));
 
         if (items.length === 0) {
           throw new Error("Grocery item not found");
@@ -58,60 +48,205 @@ export const appRouter = createTRPCRouter({
         return items[0];
       }),
 
-    toggleInCart: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        // First, get the current item
-        const items = await db
-          .select()
-          .from(groceryLists)
-          .where(eq(groceryLists.id, input.id));
-
-        if (items.length === 0) {
-          throw new Error("Grocery item not found");
-        }
-
-        const currentItem = items[0];
-
-        // Toggle the inCart status
-        const updatedItems = await db
-          .update(groceryLists)
-          .set({ inCart: !currentItem.inCart })
-          .where(eq(groceryLists.id, input.id))
-          .returning();
-
-        return updatedItems[0];
-      }),
-
     create: publicProcedure
-      .input(z.object({ name: z.string() }))
+      .input(
+        z.object({
+          name: z.string(),
+          recipeId: z.number().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const newItems = await db
-          .insert(groceryLists)
-          .values({ name: input.name, inCart: false })
+          .insert(groceryItems)
+          .values({
+            name: input.name,
+            recipeId: input.recipeId || null,
+          })
           .returning();
 
         return newItems[0];
+      }),
+
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          recipeId: z.number().optional().nullable(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...updateData } = input;
+        const updatedItems = await db
+          .update(groceryItems)
+          .set(updateData)
+          .where(eq(groceryItems.id, id))
+          .returning();
+
+        if (updatedItems.length === 0) {
+          throw new Error("Grocery item not found");
+        }
+        return updatedItems[0];
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const deletedItems = await db
+          .delete(groceryItems)
+          .where(eq(groceryItems.id, input.id))
+          .returning();
+
+        if (deletedItems.length === 0) {
+          throw new Error("Grocery item not found");
+        }
+        return deletedItems[0];
       }),
   }),
 
   recipes: createTRPCRouter({
     getAll: publicProcedure.query(async () => {
-      // Call the NextJS API route
-      const response = await fetch("http://localhost:3000/api/recipes");
-      const data = await response.json();
-      return data as Recipe[];
+      const allRecipes = await db.query.recipes.findMany({
+        with: {
+          groceryItems: true,
+        },
+      });
+      return allRecipes;
     }),
 
     getById: publicProcedure
-      .input(z.object({ id: z.string() }))
+      .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        // Call the NextJS API route with ID parameter
-        const response = await fetch(
-          `http://localhost:3000/api/recipes?id=${input.id}`
-        );
-        const data = await response.json();
-        return data as Recipe;
+        const recipe = await db.query.recipes.findFirst({
+          where: eq(recipes.id, input.id),
+          with: {
+            groceryItems: true,
+          },
+        });
+
+        if (!recipe) {
+          throw new Error("Recipe not found");
+        }
+        return recipe;
+      }),
+
+    create: publicProcedure
+      .input(
+        z.object({
+          name: z.string(),
+          groceryItems: z
+            .array(
+              z.object({
+                name: z.string(),
+              })
+            )
+            .optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const newRecipes = await db
+          .insert(recipes)
+          .values({
+            name: input.name,
+          })
+          .returning();
+
+        const newRecipe = newRecipes[0];
+
+        // If grocery items are provided, insert them
+        if (input.groceryItems && input.groceryItems.length > 0) {
+          await db.insert(groceryItems).values(
+            input.groceryItems.map((item) => ({
+              name: item.name,
+              recipeId: newRecipe.id,
+            }))
+          );
+        }
+
+        // Return the recipe with grocery items
+        const recipeWithItems = await db.query.recipes.findFirst({
+          where: eq(recipes.id, newRecipe.id),
+          with: {
+            groceryItems: true,
+          },
+        });
+
+        return recipeWithItems;
+      }),
+
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          groceryItems: z
+            .array(
+              z.object({
+                name: z.string(),
+              })
+            )
+            .optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, groceryItems: newGroceryItems, ...updateData } = input;
+
+        // Update recipe
+        const updatedRecipes = await db
+          .update(recipes)
+          .set(updateData)
+          .where(eq(recipes.id, id))
+          .returning();
+
+        if (updatedRecipes.length === 0) {
+          throw new Error("Recipe not found");
+        }
+
+        // If grocery items are provided, replace them
+        if (newGroceryItems) {
+          // Delete existing grocery items for this recipe
+          await db.delete(groceryItems).where(eq(groceryItems.recipeId, id));
+
+          // Insert new grocery items
+          if (newGroceryItems.length > 0) {
+            await db.insert(groceryItems).values(
+              newGroceryItems.map((item) => ({
+                name: item.name,
+                recipeId: id,
+              }))
+            );
+          }
+        }
+
+        // Return the updated recipe with grocery items
+        const recipeWithItems = await db.query.recipes.findFirst({
+          where: eq(recipes.id, id),
+          with: {
+            groceryItems: true,
+          },
+        });
+
+        return recipeWithItems;
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        // Delete grocery items first (due to foreign key constraint)
+        await db
+          .delete(groceryItems)
+          .where(eq(groceryItems.recipeId, input.id));
+
+        // Delete recipe
+        const deletedRecipes = await db
+          .delete(recipes)
+          .where(eq(recipes.id, input.id))
+          .returning();
+
+        if (deletedRecipes.length === 0) {
+          throw new Error("Recipe not found");
+        }
+        return deletedRecipes[0];
       }),
   }),
 });
