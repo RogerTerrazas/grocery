@@ -6,6 +6,7 @@ import {
   varchar,
   uuid,
   integer,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -18,6 +19,8 @@ export const groceryItems = pgTable("grocery_items", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   recipeId: integer("recipe_id").references(() => recipes.id),
+  checked: boolean("checked").default(false).notNull(),
+  checkedAt: timestamp("checked_at"),
 });
 
 // Define relations - only if you need to query with recipe data

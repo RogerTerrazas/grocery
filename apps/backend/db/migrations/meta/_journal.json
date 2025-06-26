@@ -12,8 +12,22 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1750016400000,
-      "tag": "0002_update_to_grocery_items",
+      "when": 1750909688313,
+      "tag": "0002_add_items_to_recipes",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1750909912000,
+      "tag": "0003_remove_items_from_recipes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1750911842069,
+      "tag": "0003_equal_giant_man",
       "breakpoints": true
     }
   ]

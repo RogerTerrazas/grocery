@@ -1,10 +1,35 @@
-import React from "react";
-import { Text, View, YStack, XStack, useTheme, ScrollView } from "tamagui";
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  YStack,
+  XStack,
+  useTheme,
+  ScrollView,
+  Button,
+  Input,
+} from "tamagui";
 import { trpc } from "../utils/trpc";
+import { useRouter } from "expo-router";
 
 export const RecipeList = () => {
   const theme = useTheme();
+  const router = useRouter();
+  const [newRecipeName, setNewRecipeName] = useState("");
+
   const recipesQuery = trpc.recipes.getAll.useQuery();
+  const createRecipeMutation = trpc.recipes.create.useMutation({
+    onSuccess: () => {
+      recipesQuery.refetch();
+      setNewRecipeName("");
+    },
+  });
+
+  const handleCreateRecipe = () => {
+    if (newRecipeName.trim()) {
+      createRecipeMutation.mutate({ name: newRecipeName.trim() });
+    }
+  };
 
   if (recipesQuery.isLoading) {
     return (
@@ -25,7 +50,25 @@ export const RecipeList = () => {
 
   return (
     <YStack style={{ flex: 1 }}>
-      <YStack style={{ padding: 16, paddingBottom: 0 }}></YStack>
+      {/* Add new recipe form */}
+      <YStack style={{ padding: 16, paddingBottom: 8 }}>
+        <XStack style={{ gap: 8, alignItems: "center" }}>
+          <Input
+            flex={1}
+            placeholder="Add new recipe..."
+            value={newRecipeName}
+            onChangeText={setNewRecipeName}
+            onSubmitEditing={handleCreateRecipe}
+          />
+          <Button
+            onPress={handleCreateRecipe}
+            disabled={!newRecipeName.trim() || createRecipeMutation.isPending}
+          >
+            {createRecipeMutation.isPending ? "Adding..." : "Add"}
+          </Button>
+        </XStack>
+      </YStack>
+
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <YStack style={{ padding: 16, paddingTop: 8, gap: 16 }}>
           {recipesQuery.data?.map((recipe) => (
@@ -40,9 +83,23 @@ export const RecipeList = () => {
                 gap: 12,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                {recipe.name}
-              </Text>
+              <XStack
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: "500", flex: 1 }}>
+                  {recipe.name}
+                </Text>
+                <Button
+                  size="$3"
+                  onPress={() => router.push(`/recipe/${recipe.id}`)}
+                  style={{ marginLeft: 12 }}
+                >
+                  View/Edit
+                </Button>
+              </XStack>
 
               <YStack style={{ gap: 8, marginTop: 12 }}>
                 <Text style={{ fontSize: 16, fontWeight: "500", opacity: 0.8 }}>

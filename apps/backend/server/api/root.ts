@@ -9,6 +9,8 @@ interface GroceryItem {
   id: number;
   name: string;
   recipeId?: number | null;
+  checked: boolean;
+  checkedAt?: Date | null;
 }
 
 interface Recipe {
@@ -30,7 +32,11 @@ export const appRouter = createTRPCRouter({
 
   groceries: createTRPCRouter({
     getAll: publicProcedure.query(async () => {
-      const items = await db.select().from(groceryItems);
+      const items = await db.query.groceryItems.findMany({
+        with: {
+          recipe: true,
+        },
+      });
       return items;
     }),
 
@@ -73,6 +79,8 @@ export const appRouter = createTRPCRouter({
           id: z.number(),
           name: z.string().optional(),
           recipeId: z.number().optional().nullable(),
+          checked: z.boolean().optional(),
+          checkedAt: z.date().optional().nullable(),
         })
       )
       .mutation(async ({ input }) => {
@@ -86,6 +94,35 @@ export const appRouter = createTRPCRouter({
         if (updatedItems.length === 0) {
           throw new Error("Grocery item not found");
         }
+        return updatedItems[0];
+      }),
+
+    toggleChecked: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        // First get the current item to toggle its checked status
+        const currentItems = await db
+          .select()
+          .from(groceryItems)
+          .where(eq(groceryItems.id, input.id));
+
+        if (currentItems.length === 0) {
+          throw new Error("Grocery item not found");
+        }
+
+        const currentItem = currentItems[0];
+        const newCheckedStatus = !currentItem.checked;
+        const checkedAt = newCheckedStatus ? new Date() : null;
+
+        const updatedItems = await db
+          .update(groceryItems)
+          .set({
+            checked: newCheckedStatus,
+            checkedAt: checkedAt,
+          })
+          .where(eq(groceryItems.id, input.id))
+          .returning();
+
         return updatedItems[0];
       }),
 
@@ -202,15 +239,41 @@ export const appRouter = createTRPCRouter({
           throw new Error("Recipe not found");
         }
 
-        // If grocery items are provided, replace them
+        // If grocery items are provided, update them while preserving checked status
         if (newGroceryItems) {
-          // Delete existing grocery items for this recipe
-          await db.delete(groceryItems).where(eq(groceryItems.recipeId, id));
+          // Get existing grocery items for this recipe
+          const existingItems = await db
+            .select()
+            .from(groceryItems)
+            .where(eq(groceryItems.recipeId, id));
 
-          // Insert new grocery items
-          if (newGroceryItems.length > 0) {
+          // Create a map of existing items by name for quick lookup
+          const existingItemsMap = new Map(
+            existingItems.map((item) => [item.name, item])
+          );
+
+          // Get the names of new items
+          const newItemNames = new Set(
+            newGroceryItems.map((item) => item.name)
+          );
+
+          // Delete items that are no longer in the new list
+          const itemsToDelete = existingItems.filter(
+            (item) => !newItemNames.has(item.name)
+          );
+          for (const itemToDelete of itemsToDelete) {
+            await db
+              .delete(groceryItems)
+              .where(eq(groceryItems.id, itemToDelete.id));
+          }
+
+          // Insert new items that don't exist yet
+          const itemsToInsert = newGroceryItems.filter(
+            (item) => !existingItemsMap.has(item.name)
+          );
+          if (itemsToInsert.length > 0) {
             await db.insert(groceryItems).values(
-              newGroceryItems.map((item) => ({
+              itemsToInsert.map((item) => ({
                 name: item.name,
                 recipeId: id,
               }))

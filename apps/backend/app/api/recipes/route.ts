@@ -4,10 +4,8 @@ import { recipes } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 
 interface Recipe {
-  id: string;
+  id: number;
   name: string;
-  description: string;
-  ingredients: string[];
 }
 
 // CORS headers
@@ -30,10 +28,18 @@ export async function GET(request: Request) {
 
     // If ID is provided, return specific recipe
     if (id) {
+      const recipeId = parseInt(id, 10);
+      if (isNaN(recipeId)) {
+        return NextResponse.json(
+          { error: "Invalid recipe ID" },
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
       const recipeList = await db
         .select()
         .from(recipes)
-        .where(eq(recipes.id, id));
+        .where(eq(recipes.id, recipeId));
 
       if (recipeList.length === 0) {
         return NextResponse.json(
@@ -59,11 +65,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description, ingredients } = body;
+    const { name } = body;
 
-    if (!name || !description || !ingredients) {
+    if (!name) {
       return NextResponse.json(
-        { error: "Missing required fields: name, description, ingredients" },
+        { error: "Missing required field: name" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -72,8 +78,6 @@ export async function POST(request: Request) {
       .insert(recipes)
       .values({
         name,
-        description,
-        ingredients,
       })
       .returning();
 
