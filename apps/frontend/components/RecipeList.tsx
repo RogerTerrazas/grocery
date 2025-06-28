@@ -106,26 +106,6 @@ export const RecipeList = () => {
                   View/Edit
                 </Button>
               </XStack>
-
-              <YStack style={{ gap: 8, marginTop: 12 }}>
-                <Text style={{ fontSize: 16, fontWeight: "500", opacity: 0.8 }}>
-                  Grocery Items:
-                </Text>
-                {recipe.groceryItems && recipe.groceryItems.length > 0 ? (
-                  recipe.groceryItems.map((item) => (
-                    <Text
-                      key={item.id}
-                      style={{ fontSize: 14, lineHeight: 20 }}
-                    >
-                      • {item.name}
-                    </Text>
-                  ))
-                ) : (
-                  <Text style={{ fontSize: 14, lineHeight: 20, opacity: 0.6 }}>
-                    No grocery items added yet
-                  </Text>
-                )}
-              </YStack>
             </YStack>
           ))}
         </YStack>
