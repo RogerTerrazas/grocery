@@ -66,6 +66,12 @@ export const RecipeList = () => {
           >
             {createRecipeMutation.isPending ? "Adding..." : "Add"}
           </Button>
+          <Button
+            variant="outlined"
+            onPress={() => router.push("/create-recipe")}
+          >
+            From Text
+          </Button>
         </XStack>
       </YStack>
 

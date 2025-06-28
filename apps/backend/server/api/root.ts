@@ -3,6 +3,8 @@ import { z } from "zod";
 import { db } from "../../db";
 import { groceryItems, recipes } from "../../db/schema";
 import { eq } from "drizzle-orm";
+import { openai } from "@ai-sdk/openai";
+import { generateObject } from "ai";
 
 // Define types for our API responses - updated to match new schema
 interface GroceryItem {
@@ -150,6 +152,97 @@ export const appRouter = createTRPCRouter({
       });
       return allRecipes;
     }),
+
+    processFromText: publicProcedure
+      .input(z.object({ recipeText: z.string() }))
+      .mutation(async ({ input }) => {
+        // Define the schema for the structured recipe output
+        const RecipeSchema = z.object({
+          name: z.string().describe("The name of the recipe"),
+          ingredients: z
+            .array(
+              z.object({
+                name: z
+                  .string()
+                  .describe("The name of the ingredient/grocery item"),
+                amount: z
+                  .string()
+                  .optional()
+                  .describe('The amount needed (e.g., "2 cups", "1 lb")'),
+                notes: z
+                  .string()
+                  .optional()
+                  .describe("Any additional notes about the ingredient"),
+              })
+            )
+            .describe("List of ingredients needed for the recipe"),
+        });
+
+        try {
+          // Use Vercel AI with ChatGPT-4 mini to parse the recipe
+          const result = await generateObject({
+            model: openai("gpt-4o-mini"),
+            schema: RecipeSchema,
+            prompt: `
+              Parse the following recipe text and extract the recipe name and ingredients list.
+              The recipe text may be in any format - it could be a paragraph, a list, or structured text.
+              Extract all ingredients mentioned and try to identify quantities where possible.
+              
+              Recipe text:
+              ${input.recipeText}
+              
+              Please provide:
+              1. A clear recipe name
+              2. A list of all ingredients with their amounts (if specified) and any relevant notes
+            `,
+          });
+
+          const parsedRecipe = result.object;
+
+          // Insert the recipe into the database
+          const [newRecipe] = await db
+            .insert(recipes)
+            .values({
+              name: parsedRecipe.name,
+            })
+            .returning();
+
+          // Insert the grocery items linked to the recipe
+          const groceryItemsToInsert = parsedRecipe.ingredients.map(
+            (ingredient) => ({
+              name: ingredient.amount
+                ? `${ingredient.amount} ${ingredient.name}${
+                    ingredient.notes ? ` (${ingredient.notes})` : ""
+                  }`
+                : `${ingredient.name}${
+                    ingredient.notes ? ` (${ingredient.notes})` : ""
+                  }`,
+              recipeId: newRecipe.id,
+              checked: false,
+            })
+          );
+
+          const newGroceryItems = await db
+            .insert(groceryItems)
+            .values(groceryItemsToInsert)
+            .returning();
+
+          return {
+            success: true,
+            recipe: newRecipe,
+            groceryItems: newGroceryItems,
+            parsedData: parsedRecipe,
+          };
+        } catch (error) {
+          console.error("Error processing recipe:", error);
+
+          if (error instanceof Error) {
+            throw new Error(`Failed to process recipe: ${error.message}`);
+          }
+
+          throw new Error("Internal server error while processing recipe");
+        }
+      }),
 
     getById: publicProcedure
       .input(z.object({ id: z.number() }))

@@ -10,6 +10,7 @@ import { trpc } from "../utils/trpc";
 import { httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import { QueryClient } from "@tanstack/react-query";
+import { WebAlertDialog } from "../components/CrossPlatformAlert";
 
 export default function RootLayout() {
   const queryClient = new QueryClient();
@@ -24,7 +25,7 @@ export default function RootLayout() {
   const trpcClient = trpc.createClient({
     links: [
       httpBatchLink({
-        url: "http://192.168.1.90:3000/api/trpc",
+        url: "http://172.20.10.3:3000/api/trpc",
         transformer: superjson,
         // Add headers for CORS
         headers: {
@@ -43,6 +44,7 @@ export default function RootLayout() {
             <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
+          <WebAlertDialog />
         </TamaguiProvider>
       </trpc.Provider>
     </SafeAreaProvider>

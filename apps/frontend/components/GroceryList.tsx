@@ -128,7 +128,7 @@ export const GroceryList = () => {
           }}
           onPress={() => router.push(`/recipe/${item.recipe.id}`)}
         >
-          From: {item.recipe.name}
+          {item.recipe.name}
         </Text>
       )}
 

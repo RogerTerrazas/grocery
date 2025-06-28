@@ -13,7 +13,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { trpc } from "../../utils/trpc";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Alert } from "react-native";
+import { CrossPlatformAlert } from "../../components/CrossPlatformAlert";
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -43,21 +43,25 @@ export default function RecipeDetailScreen() {
       utils.recipes.getById.invalidate({ id: parseInt(id || "0") });
       utils.recipes.getAll.invalidate();
       setIsEditing(false);
-      Alert.alert("Success", "Recipe updated successfully!");
+      CrossPlatformAlert.alert("Success", "Recipe updated successfully!");
     },
     onError: (error) => {
-      Alert.alert("Error", error.message);
+      CrossPlatformAlert.alert("Error", error.message);
     },
   });
 
   const deleteRecipeMutation = trpc.recipes.delete.useMutation({
     onSuccess: () => {
       utils.recipes.getAll.invalidate();
-      router.back();
-      Alert.alert("Success", "Recipe deleted successfully!");
+      CrossPlatformAlert.alert("Success", "Recipe deleted successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/recipes"),
+        },
+      ]);
     },
     onError: (error) => {
-      Alert.alert("Error", error.message);
+      CrossPlatformAlert.alert("Error", error.message);
     },
   });
 
@@ -97,7 +101,7 @@ export default function RecipeDetailScreen() {
 
   const handleSave = () => {
     if (!editedName.trim()) {
-      Alert.alert("Error", "Recipe name cannot be empty");
+      CrossPlatformAlert.alert("Error", "Recipe name cannot be empty");
       return;
     }
 
@@ -129,7 +133,9 @@ export default function RecipeDetailScreen() {
   };
 
   const handleDeleteRecipe = () => {
-    Alert.alert(
+    console.log("press delete recipe"); // ← debugging
+
+    CrossPlatformAlert.alert(
       "Delete Recipe",
       "Are you sure you want to delete this recipe? This action cannot be undone.",
       [
@@ -138,6 +144,7 @@ export default function RecipeDetailScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
+            console.log("alert confirmed, mutating…"); // ← debugging
             deleteRecipeMutation.mutate({ id: parseInt(id || "0") });
           },
         },
