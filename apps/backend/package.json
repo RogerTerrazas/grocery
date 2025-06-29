@@ -27,11 +27,11 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "superjson": "^2.2.2",
+    "@types/react": "^19.1.8",
     "zod": "^3.25.63"
   },
   "devDependencies": {
     "@types/pg": "^8.15.4",
-    "@types/react": "^19.1.8",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.1",
     "postcss": "^8.5.5",
