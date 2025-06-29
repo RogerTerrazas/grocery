@@ -1,8 +1,8 @@
 import { createTRPCRouter, publicProcedure } from "./trpc";
 import { z } from "zod";
 import { db } from "../../db";
-import { groceryItems, recipes } from "../../db/schema";
-import { eq } from "drizzle-orm";
+import { groceryItems, recipes, meals } from "../../db/schema";
+import { eq, gte, lte, and } from "drizzle-orm";
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 
@@ -40,6 +40,131 @@ export const appRouter = createTRPCRouter({
         },
       });
       return items;
+    }),
+
+    getFormatted: publicProcedure.query(async () => {
+      // Get all grocery items with recipe data
+      const items = await db.query.groceryItems.findMany({
+        with: {
+          recipe: true,
+        },
+      });
+
+      // Separate checked and unchecked items
+      const checkedItems = items.filter((item) => item.checked);
+      const uncheckedItems = items.filter((item) => !item.checked);
+
+      // Sort checked items by most recently checked (most recent first)
+      const sortedCheckedItems = checkedItems.sort((a, b) => {
+        if (!a.checkedAt && !b.checkedAt) return 0;
+        if (!a.checkedAt) return 1;
+        if (!b.checkedAt) return -1;
+        return (
+          new Date(b.checkedAt).getTime() - new Date(a.checkedAt).getTime()
+        );
+      });
+
+      // Categorize unchecked items using AI if there are any
+      let categorizedUncheckedItems: any = {};
+
+      if (uncheckedItems.length > 0) {
+        try {
+          // Define the schema for grocery store categorization
+          const CategorizationSchema = z.object({
+            categories: z
+              .record(
+                z.string(),
+                z
+                  .array(z.string())
+                  .describe(
+                    "Array of grocery item names that belong to this category"
+                  )
+              )
+              .describe(
+                "Object mapping category names to arrays of grocery item names"
+              ),
+          });
+
+          // Extract just the item names for AI processing
+          const itemNames = uncheckedItems.map((item) => item.name);
+
+          // Use AI to categorize the items
+          const result = await generateObject({
+            model: openai("gpt-4o-mini"),
+            schema: CategorizationSchema,
+            prompt: `
+              Categorize the following grocery items into typical grocery store sections/categories.
+              Use common grocery store department names like:
+              - Produce (fruits, vegetables, herbs)
+              - Dairy & Eggs
+              - Meat & Seafood
+              - Bakery
+              - Pantry & Canned Goods
+              - Frozen Foods
+              - Beverages
+              - Snacks & Candy
+              - Health & Beauty
+              - Household & Cleaning
+              - Other
+
+              Grocery items to categorize:
+              ${itemNames.join(", ")}
+
+              Group similar items together and use the most appropriate grocery store section name for each category.
+              
+              Return the result in this exact format:
+              {
+                "categories": {
+                  "Category Name": ["item1", "item2"],
+                  "Another Category": ["item3", "item4"]
+                }
+              }
+            `,
+          });
+
+          const categorization = result.object;
+
+          // Map the categorized item names back to full item objects
+          categorizedUncheckedItems = {};
+
+          for (const [category, itemNamesInCategory] of Object.entries(
+            categorization.categories
+          )) {
+            categorizedUncheckedItems[category] = uncheckedItems.filter(
+              (item) => itemNamesInCategory.includes(item.name)
+            );
+          }
+
+          // Handle any items that weren't categorized (fallback)
+          const categorizedItemNames = new Set(
+            Object.values(categorization.categories).flat()
+          );
+          const uncategorizedItems = uncheckedItems.filter(
+            (item) => !categorizedItemNames.has(item.name)
+          );
+
+          if (uncategorizedItems.length > 0) {
+            categorizedUncheckedItems["Other"] = [
+              ...(categorizedUncheckedItems["Other"] || []),
+              ...uncategorizedItems,
+            ];
+          }
+        } catch (error) {
+          console.error("Error categorizing grocery items:", error);
+          // Fallback: put all unchecked items in a single category
+          categorizedUncheckedItems = {
+            "Grocery Items": uncheckedItems,
+          };
+        }
+      }
+
+      return {
+        checked: sortedCheckedItems,
+        unchecked: categorizedUncheckedItems,
+        totalItems: items.length,
+        checkedCount: checkedItems.length,
+        uncheckedCount: uncheckedItems.length,
+      };
     }),
 
     getById: publicProcedure
@@ -403,6 +528,133 @@ export const appRouter = createTRPCRouter({
           throw new Error("Recipe not found");
         }
         return deletedRecipes[0];
+      }),
+  }),
+
+  meals: createTRPCRouter({
+    getAll: publicProcedure.query(async () => {
+      const allMeals = await db.query.meals.findMany({
+        with: {
+          recipe: true,
+        },
+      });
+      return allMeals;
+    }),
+
+    getByDateRange: publicProcedure
+      .input(
+        z.object({
+          startDate: z.date(),
+          endDate: z.date(),
+        })
+      )
+      .query(async ({ input }) => {
+        const mealsInRange = await db.query.meals.findMany({
+          where: and(
+            gte(meals.date, input.startDate),
+            lte(meals.date, input.endDate)
+          ),
+          with: {
+            recipe: true,
+          },
+        });
+        return mealsInRange;
+      }),
+
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const meal = await db.query.meals.findFirst({
+          where: eq(meals.id, input.id),
+          with: {
+            recipe: true,
+          },
+        });
+
+        if (!meal) {
+          throw new Error("Meal not found");
+        }
+        return meal;
+      }),
+
+    create: publicProcedure
+      .input(
+        z.object({
+          name: z.string(),
+          recipeId: z.number().optional(),
+          servings: z.number(),
+          date: z.date(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const newMeals = await db
+          .insert(meals)
+          .values({
+            name: input.name,
+            recipeId: input.recipeId || null,
+            servings: input.servings,
+            date: input.date,
+          })
+          .returning();
+
+        const newMeal = newMeals[0];
+
+        // Return the meal with recipe data
+        const mealWithRecipe = await db.query.meals.findFirst({
+          where: eq(meals.id, newMeal.id),
+          with: {
+            recipe: true,
+          },
+        });
+
+        return mealWithRecipe;
+      }),
+
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          recipeId: z.number().optional().nullable(),
+          servings: z.number().optional(),
+          date: z.date().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...updateData } = input;
+        const updatedMeals = await db
+          .update(meals)
+          .set(updateData)
+          .where(eq(meals.id, id))
+          .returning();
+
+        if (updatedMeals.length === 0) {
+          throw new Error("Meal not found");
+        }
+
+        // Return the updated meal with recipe data
+        const mealWithRecipe = await db.query.meals.findFirst({
+          where: eq(meals.id, id),
+          with: {
+            recipe: true,
+          },
+        });
+
+        return mealWithRecipe;
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const deletedMeals = await db
+          .delete(meals)
+          .where(eq(meals.id, input.id))
+          .returning();
+
+        if (deletedMeals.length === 0) {
+          throw new Error("Meal not found");
+        }
+        return deletedMeals[0];
       }),
   }),
 });

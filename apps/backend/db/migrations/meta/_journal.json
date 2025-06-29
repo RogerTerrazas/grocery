@@ -29,6 +29,13 @@
       "when": 1750911842069,
       "tag": "0003_equal_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1751169742097,
+      "tag": "0004_condemned_magdalene",
+      "breakpoints": true
     }
   ]
 }

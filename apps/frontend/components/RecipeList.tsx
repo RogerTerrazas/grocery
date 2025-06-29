@@ -16,8 +16,15 @@ export const RecipeList = () => {
   const theme = useTheme();
   const router = useRouter();
   const [newRecipeName, setNewRecipeName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const recipesQuery = trpc.recipes.getAll.useQuery();
+
+  // Filter recipes based on search query
+  const filteredRecipes =
+    recipesQuery.data?.filter((recipe) =>
+      recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
   const createRecipeMutation = trpc.recipes.create.useMutation({
     onSuccess: () => {
       recipesQuery.refetch();
@@ -50,8 +57,18 @@ export const RecipeList = () => {
 
   return (
     <YStack style={{ flex: 1 }}>
-      {/* Add new recipe form */}
+      {/* Search recipes */}
       <YStack style={{ padding: 16, paddingBottom: 8 }}>
+        <Input
+          placeholder="Search recipes..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={{ marginBottom: 8 }}
+        />
+      </YStack>
+
+      {/* Add new recipe form */}
+      <YStack style={{ padding: 16, paddingTop: 0, paddingBottom: 8 }}>
         <XStack style={{ gap: 8, alignItems: "center" }}>
           <Input
             flex={1}
@@ -77,37 +94,49 @@ export const RecipeList = () => {
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <YStack style={{ padding: 16, paddingTop: 8, gap: 16 }}>
-          {recipesQuery.data?.map((recipe) => (
-            <YStack
-              key={recipe.id}
+          {filteredRecipes.length === 0 && searchQuery.trim() !== "" ? (
+            <Text
               style={{
-                backgroundColor: theme.background.get(),
-                borderWidth: 1,
-                borderColor: theme.borderColor.get(),
-                borderRadius: 4,
-                padding: 16,
-                gap: 12,
+                textAlign: "center",
+                color: theme.color.get(),
+                opacity: 0.7,
               }}
             >
-              <XStack
+              No recipes found matching "{searchQuery}"
+            </Text>
+          ) : (
+            filteredRecipes.map((recipe) => (
+              <YStack
+                key={recipe.id}
                 style={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  backgroundColor: theme.background.get(),
+                  borderWidth: 1,
+                  borderColor: theme.borderColor.get(),
+                  borderRadius: 4,
+                  padding: 16,
+                  gap: 12,
                 }}
               >
-                <Text style={{ fontSize: 18, fontWeight: "500", flex: 1 }}>
-                  {recipe.name}
-                </Text>
-                <Button
-                  size="$3"
-                  onPress={() => router.push(`/recipe/${recipe.id}`)}
-                  style={{ marginLeft: 12 }}
+                <XStack
+                  style={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  View/Edit
-                </Button>
-              </XStack>
-            </YStack>
-          ))}
+                  <Text style={{ fontSize: 18, fontWeight: "500", flex: 1 }}>
+                    {recipe.name}
+                  </Text>
+                  <Button
+                    size="$3"
+                    onPress={() => router.push(`/recipe/${recipe.id}`)}
+                    style={{ marginLeft: 12 }}
+                  >
+                    View/Edit
+                  </Button>
+                </XStack>
+              </YStack>
+            ))
+          )}
         </YStack>
       </ScrollView>
     </YStack>

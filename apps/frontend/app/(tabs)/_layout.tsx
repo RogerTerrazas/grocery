@@ -39,6 +39,14 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="planning"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name="calendar-today" color={color} />
+            ),
+          }}
+        />
       </Tabs>
     </View>
   );

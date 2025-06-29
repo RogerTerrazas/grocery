@@ -25,7 +25,7 @@ export default function RootLayout() {
   const trpcClient = trpc.createClient({
     links: [
       httpBatchLink({
-        url: "http://172.20.10.3:3000/api/trpc",
+        url: "http://192.168.1.90:3000/api/trpc",
         transformer: superjson,
         // Add headers for CORS
         headers: {
@@ -42,6 +42,8 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="add-meal" options={{ headerShown: false }} />
+            <Stack.Screen name="edit-meal" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
           <WebAlertDialog />
