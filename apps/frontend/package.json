@@ -27,6 +27,7 @@
     "entryPoint": "./node_modules/expo-router/entry"
   },
   "dependencies": {
+    "@babel/plugin-transform-template-literals": "^7.27.1",
     "@expo/metro-runtime": "~5.0.4",
     "@tamagui/config": "^1.126.16",
     "@tamagui/metro-plugin": "^1.126.16",
@@ -41,6 +42,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.3",
+    "react-native-reanimated": "^3.18.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-web": "^0.20.0",
