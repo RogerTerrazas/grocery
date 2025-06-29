@@ -29,7 +29,6 @@ dependencies:
   '@trpc/client': 11.4.2_@trpc+server@11.4.2
   '@trpc/react-query': 11.4.2_pgrztkakl2pw5aubcaiuvlxvea
   '@trpc/server': 11.4.2
-  '@types/react': 19.1.8
   ai: 4.3.16_react@19.1.0+zod@3.25.67
   dotenv: 16.6.0
   drizzle-orm: 0.44.2_@types+pg@8.15.4+pg@8.16.2
@@ -43,6 +42,7 @@ dependencies:
 
 devDependencies:
   '@types/pg': 8.15.4
+  '@types/react': 19.1.8
   autoprefixer: 10.4.21_postcss@8.5.6
   drizzle-kit: 0.31.3
   postcss: 8.5.6
@@ -927,7 +927,7 @@ packages:
     resolution: {integrity: sha512-AwAfQ2Wa5bCx9WP8nZL2uMZWod7J7/JSplxbTmBQ5ms6QpqNYm672H0Vu9ZVKVngQ+ii4R/byguVEUZQyeg44g==}
     dependencies:
       csstype: 3.1.3
-    dev: false
+    dev: true
 
   /abort-controller/3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -1071,6 +1071,7 @@ packages:
 
   /csstype/3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+    dev: true
 
   /debug/4.4.1:
     resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
