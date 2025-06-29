@@ -4,9 +4,21 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "start:staging": "expo start --config app.staging.json",
+    "start:production": "expo start --config app.production.json",
     "android": "expo start --android",
+    "android:staging": "expo start --android --config app.staging.json",
+    "android:production": "expo start --android --config app.production.json",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "ios:staging": "expo start --ios --config app.staging.json",
+    "ios:production": "expo start --ios --config app.production.json",
+    "web": "expo start --web",
+    "web:staging": "expo start --web --config app.staging.json",
+    "web:production": "expo start --web --config app.production.json",
+    "build:android:staging": "eas build --platform android --profile staging",
+    "build:android:production": "eas build --platform android --profile production",
+    "build:ios:staging": "eas build --platform ios --profile staging",
+    "build:ios:production": "eas build --platform ios --profile production"
   },
   "expo": {
     "entryPoint": "./node_modules/expo-router/entry"
