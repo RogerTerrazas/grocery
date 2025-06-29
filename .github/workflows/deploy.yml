@@ -29,6 +29,16 @@ jobs:
 
       # install everything at root, then build the Next app
       - run: npm ci
+
+      # pull in all Vercel production env-vars into apps/backend/.env.production
+      - name: Pull Vercel env into .env.production
+        run: |
+          npx vercel env pull .env.production \
+            --yes \
+            --environment production \
+            --token="$VERCEL_TOKEN"
+        working-directory: ./apps/backend
+
       - run: |
           cd apps/backend
           npm install
