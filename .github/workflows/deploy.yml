@@ -34,6 +34,15 @@ jobs:
           npm install
           npm run build
 
+      # pull in all Vercel production env-vars into apps/backend/.env.production
+      - name: Pull Vercel env into .env.production
+        run: |
+          npx vercel env pull .env.production \
+            --yes \
+            --environment production \
+            --token="$VERCEL_TOKEN"
+        working-directory: ./apps/backend
+
       # deploy the .next folder
       - run: |
           npx vercel deploy \
