@@ -12,13 +12,14 @@ import {
 import { trpc } from "../utils/trpc";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
+import { CrossPlatformAlert } from "./CrossPlatformAlert";
 
 export const GroceryList = () => {
   const theme = useTheme();
   const router = useRouter();
   const [newItemName, setNewItemName] = useState("");
 
-  const groceriesQuery = trpc.groceries.getAll.useQuery();
+  const groceriesQuery = trpc.groceries.getFormatted.useQuery();
   const createItemMutation = trpc.groceries.create.useMutation({
     onSuccess: () => {
       groceriesQuery.refetch();
@@ -45,8 +46,24 @@ export const GroceryList = () => {
     }
   };
 
-  const handleDeleteItem = (id: number) => {
-    deleteItemMutation.mutate({ id });
+  const handleDeleteItem = (id: number, itemName: string) => {
+    CrossPlatformAlert.alert(
+      "Delete Item",
+      `Are you sure you want to delete "${itemName}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteItemMutation.mutate({ id });
+          },
+        },
+      ]
+    );
   };
 
   const handleToggleChecked = (id: number) => {
@@ -68,19 +85,10 @@ export const GroceryList = () => {
     );
   }
 
-  // Separate unchecked and checked items
-  const uncheckedItems =
-    groceriesQuery.data?.filter((item) => !item.checked) || [];
-  const checkedItems =
-    groceriesQuery.data?.filter((item) => item.checked) || [];
-
-  // Sort checked items by most recently checked (most recent first)
-  const sortedCheckedItems = checkedItems.sort((a, b) => {
-    if (!a.checkedAt && !b.checkedAt) return 0;
-    if (!a.checkedAt) return 1;
-    if (!b.checkedAt) return -1;
-    return new Date(b.checkedAt).getTime() - new Date(a.checkedAt).getTime();
-  });
+  // Get the formatted data from the new endpoint
+  const formattedData = groceriesQuery.data;
+  const checkedItems = formattedData?.checked || [];
+  const uncheckedCategories = formattedData?.unchecked || {};
 
   const renderGroceryItem = (item: any) => (
     <XStack
@@ -148,7 +156,7 @@ export const GroceryList = () => {
         <Button
           size="$2"
           variant="outlined"
-          onPress={() => handleDeleteItem(item.id)}
+          onPress={() => handleDeleteItem(item.id, item.name)}
           disabled={deleteItemMutation.isPending}
         >
           {deleteItemMutation.isPending ? "..." : "×"}
@@ -178,15 +186,29 @@ export const GroceryList = () => {
 
       {/* Grocery items list */}
       <YStack style={{ gap: 8, overflow: "auto", flex: 1 }}>
-        {/* Unchecked items section */}
-        {uncheckedItems.length > 0 && (
-          <YStack style={{ gap: 8 }}>
-            {uncheckedItems.map(renderGroceryItem)}
+        {/* Unchecked items section - organized by categories */}
+        {Object.keys(uncheckedCategories).length > 0 && (
+          <YStack style={{ gap: 16 }}>
+            {Object.entries(uncheckedCategories).map(([category, items]) => (
+              <YStack key={category} style={{ gap: 8 }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: "#556B2F",
+                    paddingBottom: 4,
+                  }}
+                >
+                  {category}
+                </Text>
+                {(items as any[]).map(renderGroceryItem)}
+              </YStack>
+            ))}
           </YStack>
         )}
 
         {/* Checked items section - sorted by most recently checked */}
-        {sortedCheckedItems.length > 0 && (
+        {checkedItems.length > 0 && (
           <YStack style={{ gap: 8, marginTop: 16 }}>
             <Text
               style={{
@@ -198,7 +220,7 @@ export const GroceryList = () => {
             >
               Recently Completed
             </Text>
-            {sortedCheckedItems.map(renderGroceryItem)}
+            {checkedItems.map(renderGroceryItem)}
           </YStack>
         )}
       </YStack>
