@@ -9,6 +9,7 @@ specifiers:
   '@tanstack/react-query': ^5.80.7
   '@trpc/client': ^11.4.0
   '@trpc/react-query': ^11.4.0
+  '@trpc/server': ^11.4.0
   '@types/react': ~19.0.10
   expo: ~53.0.11
   expo-constants: ^17.1.6
@@ -32,8 +33,9 @@ dependencies:
   '@tamagui/config': 1.129.5_koahjilrnytlslulq462vjqujm
   '@tamagui/metro-plugin': 1.129.5_4blm7arjktxq2nm7m54l5vlb4u
   '@tanstack/react-query': 5.81.5_react@19.0.0
-  '@trpc/client': 11.4.3_typescript@5.8.3
-  '@trpc/react-query': 11.4.3_doj7blnrnhxnrpk4gal2sdedfm
+  '@trpc/client': 11.4.3_r6zetexuv3fmqxdzmpjmf6xvzi
+  '@trpc/react-query': 11.4.3_tp3bzqmyrmnciab5es7gllbam4
+  '@trpc/server': 11.4.3_typescript@5.8.3
   expo: 53.0.13_p6ool6zhk6zvrzf52wowdoukle
   expo-constants: 17.1.6_k2y2ufcpoziqfszpyvn735z2ve
   expo-linking: 7.1.5_enc3ntod77acyei4h4ftafpfnm
@@ -4083,16 +4085,17 @@ packages:
       react: 19.0.0
     dev: false
 
-  /@trpc/client/11.4.3_typescript@5.8.3:
+  /@trpc/client/11.4.3_r6zetexuv3fmqxdzmpjmf6xvzi:
     resolution: {integrity: sha512-i2suttUCfColktXT8bqex5kHW5jpT15nwUh0hGSDiW1keN621kSUQKcLJ095blqQAUgB+lsmgSqSMmB4L9shQQ==}
     peerDependencies:
       '@trpc/server': 11.4.3
       typescript: '>=5.7.2'
     dependencies:
+      '@trpc/server': 11.4.3_typescript@5.8.3
       typescript: 5.8.3
     dev: false
 
-  /@trpc/react-query/11.4.3_doj7blnrnhxnrpk4gal2sdedfm:
+  /@trpc/react-query/11.4.3_tp3bzqmyrmnciab5es7gllbam4:
     resolution: {integrity: sha512-z+jhAiOBD22NNhHtvF0iFp9hO36YFA7M8AiUu/XtNmMxyLd3Y9/d1SMjMwlTdnGqxEGPo41VEWBrdhDUGtUuHg==}
     peerDependencies:
       '@tanstack/react-query': ^5.80.3
@@ -4103,9 +4106,18 @@ packages:
       typescript: '>=5.7.2'
     dependencies:
       '@tanstack/react-query': 5.81.5_react@19.0.0
-      '@trpc/client': 11.4.3_typescript@5.8.3
+      '@trpc/client': 11.4.3_r6zetexuv3fmqxdzmpjmf6xvzi
+      '@trpc/server': 11.4.3_typescript@5.8.3
       react: 19.0.0
       react-dom: 19.0.0_react@19.0.0
+      typescript: 5.8.3
+    dev: false
+
+  /@trpc/server/11.4.3_typescript@5.8.3:
+    resolution: {integrity: sha512-wnWq3wiLlMOlYkaIZz+qbuYA5udPTLS4GVVRyFkr6aT83xpdCHyVtURT+u4hSoIrOXQM9OPCNXSXsAujWZDdaw==}
+    peerDependencies:
+      typescript: '>=5.7.2'
+    dependencies:
       typescript: 5.8.3
     dev: false
 
