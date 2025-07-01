@@ -11,6 +11,7 @@ specifiers:
   '@trpc/react-query': 11.4.0
   '@trpc/server': 11.4.0
   '@types/react': 19.0.10
+  cross-env: ^7.0.3
   expo: 53.0.13
   expo-constants: 17.1.6
   expo-linking: 7.1.5
@@ -55,6 +56,7 @@ dependencies:
 devDependencies:
   '@babel/core': 7.26.0
   '@types/react': 19.0.10
+  cross-env: 7.0.3
   tailwindcss: 3.4.17
   typescript: 5.8.3
 
@@ -4989,6 +4991,14 @@ packages:
       js-yaml: 3.14.1
       parse-json: 4.0.0
     dev: false
+
+  /cross-env/7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.6
+    dev: true
 
   /cross-fetch/3.2.0:
     resolution: {integrity: sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q==}
