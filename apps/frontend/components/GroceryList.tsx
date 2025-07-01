@@ -18,6 +18,7 @@ export const GroceryList = () => {
   const theme = useTheme();
   const router = useRouter();
   const [newItemName, setNewItemName] = useState("");
+  const utils = trpc.useUtils();
 
   const groceriesQuery = trpc.groceries.getFormatted.useQuery();
   const createItemMutation = trpc.groceries.create.useMutation({
@@ -29,8 +30,85 @@ export const GroceryList = () => {
   const deleteItemMutation = trpc.groceries.delete.useMutation({
     onSuccess: () => groceriesQuery.refetch(),
   });
+
   const toggleCheckedMutation = trpc.groceries.toggleChecked.useMutation({
-    onSuccess: () => groceriesQuery.refetch(),
+    onMutate: async ({ id }) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await utils.groceries.getFormatted.cancel();
+
+      // Snapshot the previous value
+      const previousData = utils.groceries.getFormatted.getData();
+
+      // Optimistically update the cache
+      if (previousData) {
+        const updatedData = { ...previousData };
+
+        // Find and toggle the item in unchecked categories
+        let itemFound = false;
+        Object.keys(updatedData.unchecked).forEach((category) => {
+          const items = updatedData.unchecked[category];
+          const itemIndex = items.findIndex((item: any) => item.id === id);
+          if (itemIndex !== -1) {
+            const item = items[itemIndex];
+            // Remove from unchecked and add to checked
+            updatedData.unchecked[category] = items.filter(
+              (item: any) => item.id !== id
+            );
+            updatedData.checked = [
+              { ...item, checked: true, checkedAt: new Date().toISOString() },
+              ...updatedData.checked,
+            ];
+            itemFound = true;
+
+            // Remove empty categories
+            if (updatedData.unchecked[category].length === 0) {
+              delete updatedData.unchecked[category];
+            }
+          }
+        });
+
+        // If not found in unchecked, look in checked items
+        if (!itemFound) {
+          const checkedIndex = updatedData.checked.findIndex(
+            (item: any) => item.id === id
+          );
+          if (checkedIndex !== -1) {
+            const item = updatedData.checked[checkedIndex];
+            // Remove from checked and add to unchecked
+            updatedData.checked = updatedData.checked.filter(
+              (item: any) => item.id !== id
+            );
+
+            // Add back to appropriate category in unchecked
+            // Since we don't have category info in checked items, use "Other"
+            const category = "Other";
+            if (!updatedData.unchecked[category]) {
+              updatedData.unchecked[category] = [];
+            }
+            updatedData.unchecked[category].push({
+              ...item,
+              checked: false,
+              checkedAt: null,
+            });
+          }
+        }
+
+        utils.groceries.getFormatted.setData(undefined, updatedData);
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        utils.groceries.getFormatted.setData(undefined, context.previousData);
+      }
+    },
+    onSettled: () => {
+      // // Always refetch after error or success to ensure we have the latest data
+      // utils.groceries.getFormatted.invalidate();
+    },
   });
 
   // Refresh grocery list when the screen comes into focus (back navigation)
@@ -189,21 +267,23 @@ export const GroceryList = () => {
         {/* Unchecked items section - organized by categories */}
         {Object.keys(uncheckedCategories).length > 0 && (
           <YStack style={{ gap: 16 }}>
-            {Object.entries(uncheckedCategories).map(([category, items]) => (
-              <YStack key={category} style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: "#556B2F",
-                    paddingBottom: 4,
-                  }}
-                >
-                  {category}
-                </Text>
-                {(items as any[]).map(renderGroceryItem)}
-              </YStack>
-            ))}
+            {Object.entries(uncheckedCategories)
+              .filter(([category, items]) => (items as any[]).length > 0)
+              .map(([category, items]) => (
+                <YStack key={category} style={{ gap: 8 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: "#556B2F",
+                      paddingBottom: 4,
+                    }}
+                  >
+                    {category}
+                  </Text>
+                  {(items as any[]).map(renderGroceryItem)}
+                </YStack>
+              ))}
           </YStack>
         )}
 

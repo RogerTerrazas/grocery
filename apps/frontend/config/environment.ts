@@ -24,7 +24,7 @@ const getEnvironment = (): "development" | "staging" | "production" => {
 // Environment-specific configurations
 const environments: Record<string, EnvironmentConfig> = {
   development: {
-    API_URL: "https://grocery-backend-omega.vercel.app/api/trpc", // Fixed: Use HTTPS for Vercel deployment
+    API_URL: "http://192.168.1.90:3000/api/trpc", // Use HTTP for local development
     ENV: "development",
   },
   staging: {
