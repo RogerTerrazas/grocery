@@ -348,9 +348,34 @@ export default function EditMealScreen() {
                     size={16}
                     color={theme.green11.get()}
                   />
-                  <Text style={{ color: theme.green11.get(), fontSize: 14 }}>
+                  <Text
+                    style={{
+                      color: theme.green11.get(),
+                      fontSize: 14,
+                      flex: 1,
+                    }}
+                  >
                     Recipe selected: {selectedRecipe.name}
                   </Text>
+                  <TouchableOpacity
+                    onPress={() => router.push(`/recipe/${selectedRecipe.id}`)}
+                    style={{
+                      backgroundColor: theme.green9.get(),
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 4,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontSize: 12,
+                        fontWeight: "500",
+                      }}
+                    >
+                      View Recipe
+                    </Text>
+                  </TouchableOpacity>
                 </XStack>
               )}
             </YStack>
