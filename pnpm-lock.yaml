@@ -1,14 +1,14 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@tamagui/config': ^1.126.16
+  '@tamagui/config': 1.132.23
   turbo: latest
 
 dependencies:
-  '@tamagui/config': 1.129.11
+  '@tamagui/config': 1.132.23
 
 devDependencies:
-  turbo: 2.5.4
+  turbo: 2.5.6
 
 packages:
 
@@ -76,70 +76,72 @@ packages:
     resolution: {integrity: sha512-Z1jQI2NpdFJCVgpY+8Dq/Bt3d+YUi1928Q+/CZm/oh66fzM0RUl54vvuXlPJKybH4pdCZey1eDTPaLHkMPNgWA==}
     dev: false
 
-  /@tamagui/animations-css/1.129.11:
-    resolution: {integrity: sha512-yT349wM4RtQz9UNBFNOzFsuh5XFdITIRNq8+hcaHwoTn67vPKOtUvsIAsacxqq/u9jNyIMYpbD+xcw2KRg5xGg==}
+  /@tamagui/animations-css/1.132.23:
+    resolution: {integrity: sha512-XGJJlXS3o9rOzmkRABmdkX4j/3USo53sR+5G5Au7oIvdzjYqHzWuLiBtBtTfiqcwzQ2YOyGreYa723SqdI+HOA==}
     peerDependencies:
       react: '*'
       react-dom: '*'
     dependencies:
-      '@tamagui/constants': 1.129.11
-      '@tamagui/cubic-bezier-animator': 1.129.11
-      '@tamagui/use-presence': 1.129.11
-      '@tamagui/web': 1.129.11
+      '@tamagui/constants': 1.132.23
+      '@tamagui/cubic-bezier-animator': 1.132.23
+      '@tamagui/use-presence': 1.132.23
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react-native
     dev: false
 
-  /@tamagui/animations-moti/1.129.11:
-    resolution: {integrity: sha512-phloOqGUk6mu/kK0I+pg2wCbF8mBCKKmN5HlmXJW11T2x8DUlE8x7Jn6qH3IucSSLGZOcVckOPM1sy/AF3O5kQ==}
+  /@tamagui/animations-moti/1.132.23:
+    resolution: {integrity: sha512-sasTjFJiJV7vOQAjBjBUmpks7CT4P3GYuQhfSiq3CxXxNyUdlcMRxeLli3EKXqogfYXe5+kVq18wL1QwIfftsQ==}
     peerDependencies:
       react: '*'
+      react-native: ^0.79.2
     dependencies:
-      '@tamagui/core': 1.129.11
-      '@tamagui/use-presence': 1.129.11
+      '@tamagui/core': 1.132.23
+      '@tamagui/use-presence': 1.132.23
       moti: 0.30.0
     transitivePeerDependencies:
       - react-dom
-      - react-native
       - react-native-reanimated
     dev: false
 
-  /@tamagui/animations-react-native/1.129.11:
-    resolution: {integrity: sha512-l9TT9qqHbHogcoDEmLGExZz726RH9nXzk8dMbtPfPlvvEkpHxQJ/m5y9XcK9q3YjFtrXaJ+8fzg+tXf0FcnIXg==}
+  /@tamagui/animations-react-native/1.132.23:
+    resolution: {integrity: sha512-QrYrqLhxrxQ3x2N0AfoOAof/9QQNKb4PA3dForlmH8A2wPsqTPgqTqmshnTaks/GcHAQrZtbWgECOjKB4oe0MA==}
     peerDependencies:
       react: '*'
       react-native: '*'
     dependencies:
-      '@tamagui/constants': 1.129.11
-      '@tamagui/use-presence': 1.129.11
-      '@tamagui/web': 1.129.11
+      '@tamagui/constants': 1.132.23
+      '@tamagui/use-presence': 1.132.23
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react-dom
     dev: false
 
-  /@tamagui/colors/1.129.11:
-    resolution: {integrity: sha512-r0o2YLEg9pgGtfsVH8qadxydXkFuvNKNXtv+Na9YHkdJ9kd6cqUgA2zfJ+lW5KMiQNW+WCy/c/fwBnyq32ZL3A==}
+  /@tamagui/colors/1.132.23:
+    resolution: {integrity: sha512-+bPIKryVj+Knl/hrnwu1oRp+doapdbNwpA2RvPEVVLYQv8r5INkpZ38ccf/YW9YfGp56XjhYNzkEdze3xVvkUA==}
     dev: false
 
-  /@tamagui/compose-refs/1.129.11:
-    resolution: {integrity: sha512-4rVPCJ7HkaG3oWY/b2ilXYuxK2jmYyXQuQNv8bhvY1dqA8hMU/3P8vs6ZdQBwYpb11O50nE3yh/Wv7EJDw1boA==}
+  /@tamagui/compose-refs/1.132.23:
+    resolution: {integrity: sha512-HWlfD1ForlkOrGJg2TpR3SbGZ4uDIIy+SkCLtw5WhaV64wKrbEJQ2VkzuUnEFrrz6AAvBHkC1GrdtV4e+nMfug==}
     peerDependencies:
       react: '*'
     dev: false
 
-  /@tamagui/config/1.129.11:
-    resolution: {integrity: sha512-Ly1VXJg57CZIWKR7eXxhRYQ+FqCFjPnDty2IgK0M7BvGwbsXPAbnPI98hFNHtPSHGYtY8sozNWxO3ipOe2xC5Q==}
+  /@tamagui/config/1.132.23:
+    resolution: {integrity: sha512-lD8yUXYl49++9AeWVkKKQYkd5l43pmNNb3zW5P8UC3dJTo7BNk+6iubNI578IYj06ikDiyfZKTp39iX108WZiA==}
     dependencies:
-      '@tamagui/animations-css': 1.129.11
-      '@tamagui/animations-moti': 1.129.11
-      '@tamagui/animations-react-native': 1.129.11
-      '@tamagui/colors': 1.129.11
-      '@tamagui/font-inter': 1.129.11
-      '@tamagui/font-silkscreen': 1.129.11
-      '@tamagui/react-native-media-driver': 1.129.11
-      '@tamagui/shorthands': 1.129.11
-      '@tamagui/themes': 1.129.11
-      '@tamagui/web': 1.129.11
+      '@tamagui/animations-css': 1.132.23
+      '@tamagui/animations-moti': 1.132.23
+      '@tamagui/animations-react-native': 1.132.23
+      '@tamagui/colors': 1.132.23
+      '@tamagui/core': 1.132.23
+      '@tamagui/font-inter': 1.132.23
+      '@tamagui/font-silkscreen': 1.132.23
+      '@tamagui/react-native-media-driver': 1.132.23
+      '@tamagui/shorthands': 1.132.23
+      '@tamagui/theme-builder': 1.132.23
+      '@tamagui/themes': 1.132.23
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react
       - react-dom
@@ -147,122 +149,129 @@ packages:
       - react-native-reanimated
     dev: false
 
-  /@tamagui/constants/1.129.11:
-    resolution: {integrity: sha512-6rXcxm6uXXdo7dfevTNlAgKSDScwDrp5LavgaYc1Ai55HEKvKuOUMOCZJ9v6W837Dxz070ah7QsoE6B7Uidciw==}
+  /@tamagui/constants/1.132.23:
+    resolution: {integrity: sha512-aX2QrU+baL6D4H1BniGhcQv3pfsilf+Wi2g042e93y4FUv27LRnlxPY9H7gacbCHRbE9Iq1ybiYIVxab/Wudwg==}
     peerDependencies:
       react: '*'
+      react-native: ^0.79.2
     dev: false
 
-  /@tamagui/core/1.129.11:
-    resolution: {integrity: sha512-ZA0uzuh/2reNjQrDODNycbTazHEWgAjUdXyotWtHk94hHHtPPPLDFdHGzwJtOGQrwM9ILhaVj0pKweeo+vCbew==}
+  /@tamagui/core/1.132.23:
+    resolution: {integrity: sha512-XLu9dbPs2YC9JlRlSDPLLjHww6sfj6SlPBYShWxlakqZTQVNLidCW29ua+44qQamnL8EXEznqYi7nvINvOmSSg==}
     peerDependencies:
       react: '*'
       react-native: '*'
     dependencies:
-      '@tamagui/react-native-media-driver': 1.129.11
-      '@tamagui/react-native-use-pressable': 1.129.11
-      '@tamagui/react-native-use-responder-events': 1.129.11
-      '@tamagui/use-element-layout': 1.129.11
-      '@tamagui/use-event': 1.129.11
-      '@tamagui/web': 1.129.11
+      '@tamagui/helpers': 1.132.23
+      '@tamagui/react-native-media-driver': 1.132.23
+      '@tamagui/react-native-use-pressable': 1.132.23
+      '@tamagui/react-native-use-responder-events': 1.132.23
+      '@tamagui/use-element-layout': 1.132.23
+      '@tamagui/use-event': 1.132.23
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react-dom
     dev: false
 
-  /@tamagui/create-theme/1.129.11:
-    resolution: {integrity: sha512-/YTWAg55vAkwKB8pGI/TxRPjGXiS567UJyq5AuWOiqFySTSz74v40HHsHuZJyuM/9qA0gk6uTwjCutsrpJIvLA==}
+  /@tamagui/create-theme/1.132.23:
+    resolution: {integrity: sha512-cFVlSz/RSZ8CTTedswD1uA7/RmXmLD48KeqrpdICaNTSi7zXy6UmRTV0Awl64oGO+qZ98/vOUbuUhxJrYydRTg==}
     dependencies:
-      '@tamagui/web': 1.129.11
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react
       - react-dom
       - react-native
     dev: false
 
-  /@tamagui/cubic-bezier-animator/1.129.11:
-    resolution: {integrity: sha512-/9Ms0dajQZv893TNv7ENeD/MEEg5LovDo8gObE/oixF30/KY+i0KO+0Wk6ou7rS6kPEvj+sLVU3LI7GaxMBl1Q==}
+  /@tamagui/cubic-bezier-animator/1.132.23:
+    resolution: {integrity: sha512-TN62yz8/3glpaiBwtcE6Nap2dQKd+pMF8GrQfaqh4mBKfqB/w/+inMmXmnEvtZbY/QFa/+VsQYnEUL/CUIeblA==}
     dev: false
 
-  /@tamagui/font-inter/1.129.11:
-    resolution: {integrity: sha512-w3/d89U54YF3rqRA6r4jKYNbD/PwoUysX5fapSD4qHjoLEXQtdZUIsh+CabbWqLb2G31TRnaM9R6PvQAWhoHuw==}
+  /@tamagui/font-inter/1.132.23:
+    resolution: {integrity: sha512-Yye8mu/s17ebMaV56WOJAWfdrjoPyayOIMpTMkiWc9DeFAxSZ1DBKdXTR/BJHMaS3O8FXXEAhwao52nnj2nDTg==}
     dependencies:
-      '@tamagui/core': 1.129.11
+      '@tamagui/core': 1.132.23
     transitivePeerDependencies:
       - react
       - react-dom
       - react-native
     dev: false
 
-  /@tamagui/font-silkscreen/1.129.11:
-    resolution: {integrity: sha512-Hkc5r3vgX7Io9s4SDzoUlVVhs1ixGXngkhZ4n8Zcm3jTPxn1L9RZPsH3aibearjvYoORH4gqDAolUCMgHhCpQw==}
+  /@tamagui/font-silkscreen/1.132.23:
+    resolution: {integrity: sha512-N96OdpmY6I2vq+ZWUNOxESHiDfpojVi2yREBBL/7eHn+upz2XO3xd4pe65d7q3+qVnytTriuMEPMESkZPYyPWg==}
     dependencies:
-      '@tamagui/core': 1.129.11
+      '@tamagui/core': 1.132.23
     transitivePeerDependencies:
       - react
       - react-dom
       - react-native
     dev: false
 
-  /@tamagui/helpers/1.129.11:
-    resolution: {integrity: sha512-P78BOOVe5sp0kk/Hmy9aNI91pzDuQeFSVhQKQVMzAvF5KLc8dmuWe1Wa8mIj22di2czL0vuuh5o2cpXIhyIQ4g==}
+  /@tamagui/helpers/1.132.23:
+    resolution: {integrity: sha512-neS+XjcqNHIVsKxuQRu4MzpX2VbXmMIxtf9yblZWi4Y53LeEKGdz6kFMIjvrBO0+EKrqBeUQN8F2d5Vqc2q5TQ==}
+    peerDependencies:
+      react: '*'
     dependencies:
-      '@tamagui/constants': 1.129.11
-      '@tamagui/simple-hash': 1.129.11
+      '@tamagui/constants': 1.132.23
+      '@tamagui/simple-hash': 1.132.23
     transitivePeerDependencies:
-      - react
+      - react-native
     dev: false
 
-  /@tamagui/is-equal-shallow/1.129.11:
-    resolution: {integrity: sha512-KQfyDX8zDPpzH0ZNnhqHopTi/NS00Voa6FOhmgXSiaS7S5a5dHzp6kgxSGCV3tKG43G5hcw5XSTDON1WUwRhqw==}
+  /@tamagui/is-equal-shallow/1.132.23:
+    resolution: {integrity: sha512-EtAAYTAO4haS/FcIb8JCI5H7axscO1WK8m14T7bwyy7BKbHxqD8WfhKcPGH1IbTpoUf6b+vUYN+N68tDk0ZQ4g==}
+    peerDependencies:
+      react: '*'
     dev: false
 
-  /@tamagui/normalize-css-color/1.129.11:
-    resolution: {integrity: sha512-mT4mubpFvPOiril2KG7XXS/TGWBVdgNoq4LYMpiq5g/hsc9t+rrVQLkrlygizTgXNsP0MtqYRPnADu82YXAN4A==}
+  /@tamagui/normalize-css-color/1.132.23:
+    resolution: {integrity: sha512-hT9NgeqOcWdh6C6N0aC1uhztS21KJJ40SK2mY0KmtPQOmyK/OIsYqw295YgffKcflcffaMcVMRkmNzJCnOZOsg==}
     dependencies:
       '@react-native/normalize-color': 2.1.0
     dev: false
 
-  /@tamagui/react-native-media-driver/1.129.11:
-    resolution: {integrity: sha512-vR6ppSTHQIpUugirnrNOI7Pe3n7LiYSY+d/0bJPPvCspZ2shpdH/GnhsxoxlvQq/UI86DkSBkaclNbYjLVgakg==}
+  /@tamagui/react-native-media-driver/1.132.23:
+    resolution: {integrity: sha512-7jjsQ8+OaN4ULcsTzeNKlmwn6AWmw6wYmrO53LhjHxtAG0lN2ZLjVx4jNQeZsHFQ1bzbrCdwMxyPbTC7lHbocA==}
     peerDependencies:
       react-native: '*'
     dependencies:
-      '@tamagui/web': 1.129.11
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react
       - react-dom
     dev: false
 
-  /@tamagui/react-native-use-pressable/1.129.11:
-    resolution: {integrity: sha512-94ZxzTa1ma/4zGhe3U3gElaNeq+wh4qTCgCiB+JosmvXq055GMpwHYkX4xYXK3WYQIraEZIOBitQUTpDXDJeYg==}
+  /@tamagui/react-native-use-pressable/1.132.23:
+    resolution: {integrity: sha512-lf0zTv1MYLLcsvUChSEtZrJX2EMck/XnZl15qiQMI8IAc/erSGXqyvjJDLhMyKpTywmfbD3+F6ake8aIsQ2/dA==}
     peerDependencies:
       react: '*'
     dev: false
 
-  /@tamagui/react-native-use-responder-events/1.129.11:
-    resolution: {integrity: sha512-lYWOz7ElXt02HSVQXJ5lzhYsF9Cfg6LQjHp3nNUCiCguzkapVTdrS8ts+XAVO/gTcvbtFREkyLBseV5vsSnNlA==}
+  /@tamagui/react-native-use-responder-events/1.132.23:
+    resolution: {integrity: sha512-x9QcwtyewjXNN/6Z5qUoFPTGTplHWKxTH5oXOfDy/dkOjqXPnSvYuF+d19s79m54HqwRx3mAQ3WFyOA2nBUGUQ==}
     peerDependencies:
       react: '*'
     dev: false
 
-  /@tamagui/shorthands/1.129.11:
-    resolution: {integrity: sha512-L1ISZ1V0PJLUcuwqobBra09ut1njZ/4dVxCLH0uMqwC7I2ZQdt2soHQ8+f+iyODQOxOfegkpGAhrgDwJA4mIjA==}
+  /@tamagui/shorthands/1.132.23:
+    resolution: {integrity: sha512-HL2d3v0J2NhEEbjYuuoiOcnrBJtIraMeVXCSSljmpgRsV/luoFHE/aZM0+Ny4x/UkmmBt3lbMXzR9O7R5vvQzA==}
     dependencies:
-      '@tamagui/web': 1.129.11
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react
       - react-dom
       - react-native
     dev: false
 
-  /@tamagui/simple-hash/1.129.11:
-    resolution: {integrity: sha512-PlZ333Aeo2Ssa6P9/PN8AUAFdpipWEBmdmGlzEz/X4GZa+wZSUEtWdyQKj5KQ7tC8Wz6ZCjKVNrPD/sjD5fkDw==}
+  /@tamagui/simple-hash/1.132.23:
+    resolution: {integrity: sha512-/AjQt2SDCV36LLBYfp6FugKFciNHKcH13oz5li5tvVYXRsNzYmUkg19GKunP+DPGAId9uNj1VdpdYj4+ncYYIg==}
     dev: false
 
-  /@tamagui/theme-builder/1.129.11:
-    resolution: {integrity: sha512-3i3i+2tNM5RoYwpIm6UxkyQqZxGaDTqfd21xWbDHPxZfZ/qHYCzO37TF8gn7gWAVPIpPjhncodbmrA8hTux8kw==}
+  /@tamagui/theme-builder/1.132.23:
+    resolution: {integrity: sha512-ILfwN2Y1Sfm47/iXcRlVXtz/LR8/1dQftYMQhFcGo0gyQfqGHLdSSKtWSjVmmlimPjCDcw/OuOX2zLqxI+i7KQ==}
     dependencies:
-      '@tamagui/create-theme': 1.129.11
+      '@tamagui/create-theme': 1.132.23
+      '@tamagui/web': 1.132.23
       color2k: 2.0.3
     transitivePeerDependencies:
       - react
@@ -270,13 +279,13 @@ packages:
       - react-native
     dev: false
 
-  /@tamagui/themes/1.129.11:
-    resolution: {integrity: sha512-LMSIpT6FShagZVIa/Q5TetZkCVA7jXOwvVE0gVMPZHTPa4bKueZUgRjpV1Z4GMxCBm/qLfRECtEvf5lF2K4d0w==}
+  /@tamagui/themes/1.132.23:
+    resolution: {integrity: sha512-0DaQ+88BI0r6PoNrs3R32nez8eyKvDJQbwK10WXwvatQDIWcvlue0YUrJTX9cf8YpHw2RtuKTA2bJr9on7lYlA==}
     dependencies:
-      '@tamagui/colors': 1.129.11
-      '@tamagui/create-theme': 1.129.11
-      '@tamagui/theme-builder': 1.129.11
-      '@tamagui/web': 1.129.11
+      '@tamagui/colors': 1.132.23
+      '@tamagui/create-theme': 1.132.23
+      '@tamagui/theme-builder': 1.132.23
+      '@tamagui/web': 1.132.23
       color2k: 2.0.3
     transitivePeerDependencies:
       - react
@@ -284,71 +293,75 @@ packages:
       - react-native
     dev: false
 
-  /@tamagui/timer/1.129.11:
-    resolution: {integrity: sha512-cx1EIqKsznyoLXmW11Z7bIAf35tCjKZI2RehnCX2nVklwn/GPXrMgqDxMzEEPv0mUViMPuCfW4Tx1S1+9EPnjw==}
+  /@tamagui/timer/1.132.23:
+    resolution: {integrity: sha512-mr0hPeye5k7pYfb9S9Lw0dhlf3v1Z0uiavh9u+VdCjLUdw36jnrmK1ZOxFh7VourDpS/FM3HpZFLQKpy2IOwpg==}
     dev: false
 
-  /@tamagui/types/1.129.11:
-    resolution: {integrity: sha512-w7d1ao37LIBfkKhHoFIF8DjDqo1LVHemztvp0Qo4sPhnAneXas8fTwcwjXcQNrerp+aL6PU2F5cyYwX47PNOnQ==}
+  /@tamagui/types/1.132.23:
+    resolution: {integrity: sha512-b6Pn1VnaQbJG9v6C5RYkeNK6LyfEC23eLsXQnFWiBv0dpCX/Ld+dZDJjxiZGgcDmTLxxW/O/D8qzpACw7NgEPw==}
     dev: false
 
-  /@tamagui/use-did-finish-ssr/1.129.11:
-    resolution: {integrity: sha512-ZSkkbLgBQNABnB8bvhDEXsQgNIyvVp3r3BnjdV/KzvD9uXca+9maf5G32RJ8+STvFZfpZktTbzOphebD8WEeXw==}
+  /@tamagui/use-did-finish-ssr/1.132.23:
+    resolution: {integrity: sha512-rnt2pY/0ltILIP02XvQnGsJ5b4VJhObl9UvTgHuHRRl+As7He/K2NGjEk7qyEHx7EU5DqaXGTezX6m5rMkWsbQ==}
     peerDependencies:
       react: '*'
     dev: false
 
-  /@tamagui/use-element-layout/1.129.11:
-    resolution: {integrity: sha512-ubyPHriJckMSbuEZbojPdzBIbRvFe/jhwGT/mNBDTmSt1kEBzaqB3f2W2bhZMZ/nBBHBTI4Dpq8V5exk+ZBkhA==}
-    peerDependencies:
-      react: '*'
-    dependencies:
-      '@tamagui/constants': 1.129.11
-      '@tamagui/is-equal-shallow': 1.129.11
-    dev: false
-
-  /@tamagui/use-event/1.129.11:
-    resolution: {integrity: sha512-QRx8Gf3ZVVsGbbl7PuAB9zoJhBBz//a2zsAo/RjlKwBfUWUVjzo7N9yu2sezB3Rdw8zpg5WlGaMuwH+fSi9NCg==}
+  /@tamagui/use-element-layout/1.132.23:
+    resolution: {integrity: sha512-WM0RSmATvixNzfYvF6jlTtQaw7Bupje4caO8CC1bccmHUpy2x7KAd5o2eYdxM52TLWabrI3kJQD788nuhUB8oA==}
     peerDependencies:
       react: '*'
     dependencies:
-      '@tamagui/constants': 1.129.11
+      '@tamagui/constants': 1.132.23
+      '@tamagui/is-equal-shallow': 1.132.23
+    transitivePeerDependencies:
+      - react-native
     dev: false
 
-  /@tamagui/use-force-update/1.129.11:
-    resolution: {integrity: sha512-x2LLM+qztfJPImPHGQ9cIRbo6+uT/OVM/A3WSp4BK2L2KQs9U3+68LRRGuP3Lrj8q/1J3uJOT+KaCTTLnneueg==}
-    peerDependencies:
-      react: '*'
-    dev: false
-
-  /@tamagui/use-presence/1.129.11:
-    resolution: {integrity: sha512-W0kGvu8b/IpZKbvP9lqzHa0bnOvjgHLwu+Arn/2TfCFuCJyiw/mycx3FWQV+nr+mjKf/luylu6QiujYkIPlRAg==}
+  /@tamagui/use-event/1.132.23:
+    resolution: {integrity: sha512-6hlM+TOOtbRL0j5yiKcfRHZ3bXifTN4pW8afygOdDvRnzJTVFqVHXriC0qzh0sIbyFkGYo7ibqJrixa8HbBeXw==}
     peerDependencies:
       react: '*'
     dependencies:
-      '@tamagui/web': 1.129.11
+      '@tamagui/constants': 1.132.23
+    transitivePeerDependencies:
+      - react-native
+    dev: false
+
+  /@tamagui/use-force-update/1.132.23:
+    resolution: {integrity: sha512-8G+LEu8RTfr7Cyk0IAOYs+seobPcH1wnq/WDZ87CIWyA6wdX1yuSo0tzbdtEkSOkxDIadE0w2nZYVTWR4MmdWA==}
+    peerDependencies:
+      react: '*'
+    dev: false
+
+  /@tamagui/use-presence/1.132.23:
+    resolution: {integrity: sha512-Ekh5PJx2O+DPCN1babWrksd+W1Ls8o/exyp0Fo8+Z+uJrpK4lmUSnwG4qbgaDxJW2vda8td3VLUnS6HaH/s6wA==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      '@tamagui/web': 1.132.23
     transitivePeerDependencies:
       - react-dom
       - react-native
     dev: false
 
-  /@tamagui/web/1.129.11:
-    resolution: {integrity: sha512-tGSZJ6OPrCDM63x7wVaGhoYO23qbUzaxxYTdAAZPwHUt4IgMHxddwgUGu78CWwX1OOS0BTRnKnv+iFOZumulpw==}
+  /@tamagui/web/1.132.23:
+    resolution: {integrity: sha512-122dOzCGJWzy5tPd45wT4SSMAo3s97i8WDzsOaHYpQJe8dhs0i/VdeJb6pd4LBkbMLCaB2vp8dmki4Ao6RJYjg==}
     peerDependencies:
       react: '*'
       react-dom: '*'
       react-native: '*'
     dependencies:
-      '@tamagui/compose-refs': 1.129.11
-      '@tamagui/constants': 1.129.11
-      '@tamagui/helpers': 1.129.11
-      '@tamagui/is-equal-shallow': 1.129.11
-      '@tamagui/normalize-css-color': 1.129.11
-      '@tamagui/timer': 1.129.11
-      '@tamagui/types': 1.129.11
-      '@tamagui/use-did-finish-ssr': 1.129.11
-      '@tamagui/use-event': 1.129.11
-      '@tamagui/use-force-update': 1.129.11
+      '@tamagui/compose-refs': 1.132.23
+      '@tamagui/constants': 1.132.23
+      '@tamagui/helpers': 1.132.23
+      '@tamagui/is-equal-shallow': 1.132.23
+      '@tamagui/normalize-css-color': 1.132.23
+      '@tamagui/timer': 1.132.23
+      '@tamagui/types': 1.132.23
+      '@tamagui/use-did-finish-ssr': 1.132.23
+      '@tamagui/use-event': 1.132.23
+      '@tamagui/use-force-update': 1.132.23
     dev: false
 
   /color2k/2.0.3:
@@ -412,62 +425,62 @@ packages:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
     dev: false
 
-  /turbo-darwin-64/2.5.4:
-    resolution: {integrity: sha512-ah6YnH2dErojhFooxEzmvsoZQTMImaruZhFPfMKPBq8sb+hALRdvBNLqfc8NWlZq576FkfRZ/MSi4SHvVFT9PQ==}
+  /turbo-darwin-64/2.5.6:
+    resolution: {integrity: sha512-3C1xEdo4aFwMJAPvtlPqz1Sw/+cddWIOmsalHFMrsqqydcptwBfu26WW2cDm3u93bUzMbBJ8k3zNKFqxJ9ei2A==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-darwin-arm64/2.5.4:
-    resolution: {integrity: sha512-2+Nx6LAyuXw2MdXb7pxqle3MYignLvS7OwtsP9SgtSBaMlnNlxl9BovzqdYAgkUW3AsYiQMJ/wBRb7d+xemM5A==}
+  /turbo-darwin-arm64/2.5.6:
+    resolution: {integrity: sha512-LyiG+rD7JhMfYwLqB6k3LZQtYn8CQQUePbpA8mF/hMLPAekXdJo1g0bUPw8RZLwQXUIU/3BU7tXENvhSGz5DPA==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-64/2.5.4:
-    resolution: {integrity: sha512-5May2kjWbc8w4XxswGAl74GZ5eM4Gr6IiroqdLhXeXyfvWEdm2mFYCSWOzz0/z5cAgqyGidF1jt1qzUR8hTmOA==}
+  /turbo-linux-64/2.5.6:
+    resolution: {integrity: sha512-GOcUTT0xiT/pSnHL4YD6Yr3HreUhU8pUcGqcI2ksIF9b2/r/kRHwGFcsHgpG3+vtZF/kwsP0MV8FTlTObxsYIA==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-arm64/2.5.4:
-    resolution: {integrity: sha512-/2yqFaS3TbfxV3P5yG2JUI79P7OUQKOUvAnx4MV9Bdz6jqHsHwc9WZPpO4QseQm+NvmgY6ICORnoVPODxGUiJg==}
+  /turbo-linux-arm64/2.5.6:
+    resolution: {integrity: sha512-10Tm15bruJEA3m0V7iZcnQBpObGBcOgUcO+sY7/2vk1bweW34LMhkWi8svjV9iDF68+KJDThnYDlYE/bc7/zzQ==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-64/2.5.4:
-    resolution: {integrity: sha512-EQUO4SmaCDhO6zYohxIjJpOKRN3wlfU7jMAj3CgcyTPvQR/UFLEKAYHqJOnJtymbQmiiM/ihX6c6W6Uq0yC7mA==}
+  /turbo-windows-64/2.5.6:
+    resolution: {integrity: sha512-FyRsVpgaj76It0ludwZsNN40ytHN+17E4PFJyeliBEbxrGTc5BexlXVpufB7XlAaoaZVxbS6KT8RofLfDRyEPg==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-arm64/2.5.4:
-    resolution: {integrity: sha512-oQ8RrK1VS8lrxkLriotFq+PiF7iiGgkZtfLKF4DDKsmdbPo0O9R2mQxm7jHLuXraRCuIQDWMIw6dpcr7Iykf4A==}
+  /turbo-windows-arm64/2.5.6:
+    resolution: {integrity: sha512-j/tWu8cMeQ7HPpKri6jvKtyXg9K1gRyhdK4tKrrchH8GNHscPX/F71zax58yYtLRWTiK04zNzPcUJuoS0+v/+Q==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo/2.5.4:
-    resolution: {integrity: sha512-kc8ZibdRcuWUG1pbYSBFWqmIjynlD8Lp7IB6U3vIzvOv9VG+6Sp8bzyeBWE3Oi8XV5KsQrznyRTBPvrf99E4mA==}
+  /turbo/2.5.6:
+    resolution: {integrity: sha512-gxToHmi9oTBNB05UjUsrWf0OyN5ZXtD0apOarC1KIx232Vp3WimRNy3810QzeNSgyD5rsaIDXlxlbnOzlouo+w==}
     hasBin: true
     optionalDependencies:
-      turbo-darwin-64: 2.5.4
-      turbo-darwin-arm64: 2.5.4
-      turbo-linux-64: 2.5.4
-      turbo-linux-arm64: 2.5.4
-      turbo-windows-64: 2.5.4
-      turbo-windows-arm64: 2.5.4
+      turbo-darwin-64: 2.5.6
+      turbo-darwin-arm64: 2.5.6
+      turbo-linux-64: 2.5.6
+      turbo-linux-arm64: 2.5.6
+      turbo-windows-64: 2.5.6
+      turbo-windows-arm64: 2.5.6
     dev: true
