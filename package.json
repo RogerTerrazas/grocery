@@ -16,6 +16,6 @@
     "turbo": "latest"
   },
   "dependencies": {
-    "@tamagui/config": "^1.126.16"
+    "@tamagui/config": "1.132.23"
   }
 }
