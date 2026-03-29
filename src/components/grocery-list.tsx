@@ -55,25 +55,31 @@ export function GroceryList({
     staleTime: Number.POSITIVE_INFINITY,
   })
 
-  // Build sections in a single pass so each item is assigned to exactly one
-  // category, even if the AI returned the same item under multiple categories.
+  // Build sections in a single pass. Use a Set of assigned IDs as the sole
+  // source of truth — an item can only ever be assigned once, regardless of
+  // how many categories the AI places its name in.
   const { sections, uncategorized } = (() => {
     const assignedIds = new Set<number>()
-    // Build a lookup map for O(1) access
-    const itemByName = new Map(
-      uncheckedItems.map((i) => [i.name.toLowerCase(), i])
-    )
 
     const sections = categories
       .map((cat) => {
-        const catItems = cat.items
-          .map((name) => itemByName.get(name.toLowerCase()))
-          .filter(
-            (item): item is GroceryItemWithRecipe =>
-              item !== undefined && !assignedIds.has(item.id)
+        const catItems = cat.items.flatMap((name) =>
+          // Find ALL unassigned items whose name matches (handles duplicates)
+          uncheckedItems.filter(
+            (i) =>
+              !assignedIds.has(i.id) &&
+              i.name.toLowerCase() === name.toLowerCase()
           )
-        for (const item of catItems) assignedIds.add(item.id)
-        return { name: cat.name, items: catItems }
+        )
+        // Dedup within catItems themselves (same name appears twice in cat.items)
+        const seen = new Set<number>()
+        const uniqueCatItems = catItems.filter((i) => {
+          if (seen.has(i.id)) return false
+          seen.add(i.id)
+          return true
+        })
+        for (const item of uniqueCatItems) assignedIds.add(item.id)
+        return { name: cat.name, items: uniqueCatItems }
       })
       .filter((s) => s.items.length > 0)
 
