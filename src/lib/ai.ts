@@ -5,7 +5,7 @@ import { z } from 'zod'
 // Requires AI_GATEWAY_API_KEY env var
 function getModel() {
   // @ts-ignore
-  return 'anthropic/claude-haiku-3-5' as const
+  return 'anthropic/claude-haiku-4-5' as const
 }
 
 const recipeSchema = z.object({
