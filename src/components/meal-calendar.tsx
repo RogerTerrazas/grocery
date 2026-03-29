@@ -245,28 +245,7 @@ export function MealCalendar({
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="meal-name">Meal Name</Label>
-              <Input
-                id="meal-name"
-                placeholder="e.g. Pasta Bolognese"
-                value={newMealName}
-                onChange={(e) => setNewMealName(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="servings">Servings</Label>
-              <Input
-                id="servings"
-                type="number"
-                min="1"
-                max="20"
-                value={newMealServings}
-                onChange={(e) => setNewMealServings(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="recipe-search">Link to Recipe (optional)</Label>
+              <Label htmlFor="recipe-search">Link to Recipe</Label>
               <Input
                 id="recipe-search"
                 placeholder="Search recipes..."
@@ -275,8 +254,9 @@ export function MealCalendar({
                   setRecipeSearch(e.target.value)
                   setNewMealRecipeId('')
                 }}
+                autoFocus
               />
-              {recipeSearch && filteredRecipes.length > 0 && (
+              {recipeSearch && filteredRecipes.length > 0 && !newMealRecipeId && (
                 <div className="border rounded-md overflow-hidden max-h-40 overflow-y-auto">
                   {filteredRecipes.map((r) => (
                     <button
@@ -299,6 +279,26 @@ export function MealCalendar({
                   ✓ Linked to recipe
                 </p>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meal-name">Meal Name</Label>
+              <Input
+                id="meal-name"
+                placeholder="e.g. Pasta Bolognese"
+                value={newMealName}
+                onChange={(e) => setNewMealName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="servings">Servings</Label>
+              <Input
+                id="servings"
+                type="number"
+                min="1"
+                max="20"
+                value={newMealServings}
+                onChange={(e) => setNewMealServings(e.target.value)}
+              />
             </div>
           </div>
           <Separator />
