@@ -6,6 +6,7 @@ import { Loader2, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { fetchMealsByDateRange } from '@/actions/fetch'
 import { createMeal, deleteMeal } from '@/actions/meals'
 import type { Meal, Recipe } from '@/db/schema'
 
@@ -35,6 +36,7 @@ export function MealCalendar({
   initialMeals,
   recipes,
   startDate,
+  endDate,
 }: MealCalendarProps) {
   const queryClient = useQueryClient()
   const [addMealDate, setAddMealDate] = useState<Date | null>(null)
@@ -45,7 +47,7 @@ export function MealCalendar({
 
   const { data: meals } = useQuery({
     queryKey: ['meals'],
-    queryFn: async () => initialMeals,
+    queryFn: () => fetchMealsByDateRange(startDate, endDate),
     initialData: initialMeals,
   })
 

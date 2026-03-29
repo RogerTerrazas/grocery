@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { startTransition, useState } from 'react'
 
+import { fetchGroceryItems } from '@/actions/fetch'
 import {
   createGroceryItem,
   deleteGroceryItem,
@@ -37,7 +38,7 @@ export function GroceryList({
 
   const { data: items } = useQuery({
     queryKey: ['groceries'],
-    queryFn: async () => initialItems,
+    queryFn: () => fetchGroceryItems(),
     initialData: initialItems,
   })
 
