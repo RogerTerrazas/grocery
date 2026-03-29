@@ -40,7 +40,7 @@ export default function RootLayout({
             </aside>
 
             {/* Main content */}
-            <main className="flex-1 pb-20 md:overflow-y-auto md:pb-0">
+            <main className="flex-1 pb-20 md:overflow-y-auto md:pb-0 md:[scrollbar-gutter:stable]">
               {children}
             </main>
           </div>

@@ -6,7 +6,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { createGroceryItem, deleteGroceryItem, toggleGroceryItem } from '@/actions/groceries'
+import {
+  createGroceryItem,
+  deleteGroceryItem,
+  toggleGroceryItem,
+  updateGroceryItem,
+} from '@/actions/groceries'
 import { deleteRecipe, updateRecipe } from '@/actions/recipes'
 import type { GroceryItem, Recipe } from '@/db/schema'
 import { cn } from '@/lib/utils'
@@ -38,6 +43,10 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState(recipe.name)
   const [newIngredient, setNewIngredient] = useState('')
+  const [editingIngredientId, setEditingIngredientId] = useState<number | null>(
+    null
+  )
+  const [editIngredientName, setEditIngredientName] = useState('')
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
   const updateNameMutation = useMutation({
@@ -85,11 +94,28 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
       setRecipe((r) => ({
         ...r,
         groceryItems: r.groceryItems.map((i) =>
-          i.id === id ? { ...i, checked, checkedAt: checked ? new Date() : null } : i
+          i.id === id
+            ? { ...i, checked, checkedAt: checked ? new Date() : null }
+            : i
         ),
       }))
     },
     onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['groceries'] })
+    },
+  })
+
+  const updateIngredientMutation = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      updateGroceryItem(id, name),
+    onSuccess: (_data, { id, name }) => {
+      setRecipe((r) => ({
+        ...r,
+        groceryItems: r.groceryItems.map((i) =>
+          i.id === id ? { ...i, name } : i
+        ),
+      }))
+      setEditingIngredientId(null)
       queryClient.invalidateQueries({ queryKey: ['groceries'] })
     },
   })
@@ -204,31 +230,100 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
                   item.checked && 'opacity-50'
                 )}
               >
-                <Checkbox
-                  checked={item.checked}
-                  onCheckedChange={(val) =>
-                    toggleIngredientMutation.mutate({
-                      id: item.id,
-                      checked: val === true,
-                    })
-                  }
-                />
-                <span
-                  className={cn(
-                    'flex-1 text-sm',
-                    item.checked && 'line-through text-muted-foreground'
-                  )}
-                >
-                  {item.name}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                  onClick={() => deleteIngredientMutation.mutate(item.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                {editingIngredientId === item.id ? (
+                  <>
+                    <Input
+                      value={editIngredientName}
+                      onChange={(e) => setEditIngredientName(e.target.value)}
+                      className="flex-1 h-8 text-sm"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const trimmed = editIngredientName.trim()
+                          if (trimmed && trimmed !== item.name) {
+                            updateIngredientMutation.mutate({
+                              id: item.id,
+                              name: trimmed,
+                            })
+                          } else {
+                            setEditingIngredientId(null)
+                          }
+                        }
+                        if (e.key === 'Escape') {
+                          setEditingIngredientId(null)
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      className="h-8"
+                      disabled={
+                        !editIngredientName.trim() ||
+                        updateIngredientMutation.isPending
+                      }
+                      onClick={() => {
+                        const trimmed = editIngredientName.trim()
+                        if (trimmed && trimmed !== item.name) {
+                          updateIngredientMutation.mutate({
+                            id: item.id,
+                            name: trimmed,
+                          })
+                        } else {
+                          setEditingIngredientId(null)
+                        }
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8"
+                      onClick={() => setEditingIngredientId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Checkbox
+                      checked={item.checked}
+                      onCheckedChange={(val) =>
+                        toggleIngredientMutation.mutate({
+                          id: item.id,
+                          checked: val === true,
+                        })
+                      }
+                    />
+                    <span
+                      className={cn(
+                        'flex-1 text-sm',
+                        item.checked && 'line-through text-muted-foreground'
+                      )}
+                    >
+                      {item.name}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        setEditingIngredientId(item.id)
+                        setEditIngredientName(item.name)
+                      }}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      onClick={() => deleteIngredientMutation.mutate(item.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </>
+                )}
               </div>
             ))}
           </div>
