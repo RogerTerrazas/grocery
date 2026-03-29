@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "CHOKIDAR_USEPOLLING=true CHOKIDAR_INTERVAL=500 next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
