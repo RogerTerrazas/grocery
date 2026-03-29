@@ -44,15 +44,42 @@ export function GroceryList({
   // Categories are derived from unchecked item names — re-fetched any time
   // the grocery list changes
   const uncheckedItems = items.filter((i) => !i.checked)
-  const uncheckedNames = uncheckedItems.map((i) => i.name)
+  // Stable serialised key so React Query only refetches when names actually change
+  const uncheckedNamesKey = uncheckedItems.map((i) => i.name).sort().join('|')
 
   const { data: categories, isFetching: isRecategorizing } = useQuery({
-    queryKey: ['grocery-categories', uncheckedNames],
-    queryFn: () => categorizeGroceryItemsAction(uncheckedNames),
+    queryKey: ['grocery-categories', uncheckedNamesKey],
+    queryFn: () =>
+      categorizeGroceryItemsAction(uncheckedItems.map((i) => i.name)),
     initialData: initialCategories,
-    // Only re-run when names actually change, not on every render
     staleTime: Number.POSITIVE_INFINITY,
   })
+
+  // Build sections in a single pass so each item is assigned to exactly one
+  // category, even if the AI returned the same item under multiple categories.
+  const { sections, uncategorized } = (() => {
+    const assignedIds = new Set<number>()
+    // Build a lookup map for O(1) access
+    const itemByName = new Map(
+      uncheckedItems.map((i) => [i.name.toLowerCase(), i])
+    )
+
+    const sections = categories
+      .map((cat) => {
+        const catItems = cat.items
+          .map((name) => itemByName.get(name.toLowerCase()))
+          .filter(
+            (item): item is GroceryItemWithRecipe =>
+              item !== undefined && !assignedIds.has(item.id)
+          )
+        for (const item of catItems) assignedIds.add(item.id)
+        return { name: cat.name, items: catItems }
+      })
+      .filter((s) => s.items.length > 0)
+
+    const uncategorized = uncheckedItems.filter((i) => !assignedIds.has(i.id))
+    return { sections, uncategorized }
+  })()
 
   const checkedItems = items
     .filter((i) => i.checked)
@@ -156,79 +183,44 @@ export function GroceryList({
         </div>
       ) : uncheckedItems.length > 0 ? (
         <div className="space-y-4">
-          {(() => {
-            // Track assigned IDs so the same item never appears twice
-            // even if the AI places it in multiple categories
-            const assignedIds = new Set<number>()
-
-            const sections = categories.map((cat) => {
-              const catItems = cat.items
-                .map((itemName) =>
-                  uncheckedItems.find(
-                    (i) =>
-                      !assignedIds.has(i.id) &&
-                      i.name.toLowerCase() === itemName.toLowerCase()
-                  )
-                )
-                .filter(
-                  (item): item is GroceryItemWithRecipe => item !== undefined
-                )
-
-              for (const item of catItems) assignedIds.add(item.id)
-              return { cat, catItems }
-            })
-
-            const uncategorized = uncheckedItems.filter(
-              (i) => !assignedIds.has(i.id)
-            )
-
-            return (
-              <>
-                {sections.map(({ cat, catItems }) => {
-                  if (catItems.length === 0) return null
-                  return (
-                    <div key={cat.name}>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
-                        {cat.name}
-                      </h3>
-                      <div className="space-y-1">
-                        {catItems.map((item) => (
-                          <GroceryItemRow
-                            key={item.id}
-                            item={item}
-                            onToggle={(checked) =>
-                              toggleMutation.mutate({ id: item.id, checked })
-                            }
-                            onDelete={() => deleteMutation.mutate(item.id)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
-                {/* Fallback: items not matched by any category */}
-                {uncategorized.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
-                      Other
-                    </h3>
-                    <div className="space-y-1">
-                      {uncategorized.map((item) => (
-                        <GroceryItemRow
-                          key={item.id}
-                          item={item}
-                          onToggle={(checked) =>
-                            toggleMutation.mutate({ id: item.id, checked })
-                          }
-                          onDelete={() => deleteMutation.mutate(item.id)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )
-          })()}
+          {sections.map((section) => (
+            <div key={section.name}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                {section.name}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item) => (
+                  <GroceryItemRow
+                    key={item.id}
+                    item={item}
+                    onToggle={(checked) =>
+                      toggleMutation.mutate({ id: item.id, checked })
+                    }
+                    onDelete={() => deleteMutation.mutate(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+          {uncategorized.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                Other
+              </h3>
+              <div className="space-y-1">
+                {uncategorized.map((item) => (
+                  <GroceryItemRow
+                    key={item.id}
+                    item={item}
+                    onToggle={(checked) =>
+                      toggleMutation.mutate({ id: item.id, checked })
+                    }
+                    onDelete={() => deleteMutation.mutate(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : null}
 
