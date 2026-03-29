@@ -2,12 +2,12 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format, isSameDay } from 'date-fns'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
 import { fetchMealsByDateRange } from '@/actions/fetch'
-import { createMeal, deleteMeal } from '@/actions/meals'
+import { createMeal, deleteMeal, updateMeal } from '@/actions/meals'
 import type { Meal, Recipe } from '@/db/schema'
 
 import { Badge } from './ui/badge'
@@ -40,10 +40,32 @@ export function MealCalendar({
 }: MealCalendarProps) {
   const queryClient = useQueryClient()
   const [addMealDate, setAddMealDate] = useState<Date | null>(null)
+  const [editingMeal, setEditingMeal] = useState<MealWithRecipe | null>(null)
   const [newMealName, setNewMealName] = useState('')
   const [newMealServings, setNewMealServings] = useState('2')
   const [newMealRecipeId, setNewMealRecipeId] = useState<string>('')
   const [recipeSearch, setRecipeSearch] = useState('')
+
+  const isEditing = editingMeal !== null
+  const dialogOpen = addMealDate !== null || isEditing
+  const dialogDate = isEditing ? editingMeal.date : addMealDate
+
+  function resetForm() {
+    setAddMealDate(null)
+    setEditingMeal(null)
+    setNewMealName('')
+    setNewMealServings('2')
+    setNewMealRecipeId('')
+    setRecipeSearch('')
+  }
+
+  function openEditDialog(meal: MealWithRecipe) {
+    setEditingMeal(meal)
+    setNewMealName(meal.name)
+    setNewMealServings(String(meal.servings))
+    setNewMealRecipeId(meal.recipeId ? String(meal.recipeId) : '')
+    setRecipeSearch(meal.recipe?.name ?? '')
+  }
 
   const { data: meals } = useQuery({
     queryKey: ['meals'],
@@ -90,11 +112,7 @@ export function MealCalendar({
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['meals'] })
-      setAddMealDate(null)
-      setNewMealName('')
-      setNewMealServings('2')
-      setNewMealRecipeId('')
-      setRecipeSearch('')
+      resetForm()
     },
   })
 
@@ -102,8 +120,7 @@ export function MealCalendar({
     mutationFn: (id: number) => deleteMeal(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ['meals'] })
-      const previous =
-        queryClient.getQueryData<MealWithRecipe[]>(['meals'])
+      const previous = queryClient.getQueryData<MealWithRecipe[]>(['meals'])
       queryClient.setQueryData<MealWithRecipe[]>(
         ['meals'],
         (old) => old?.filter((m) => m.id !== id) ?? []
@@ -117,6 +134,49 @@ export function MealCalendar({
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['meals'] })
+    },
+  })
+
+  const updateMealMutation = useMutation({
+    mutationFn: () => {
+      if (!editingMeal) throw new Error('No meal being edited')
+      const recipeId = newMealRecipeId ? Number(newMealRecipeId) : null
+      return updateMeal(editingMeal.id, {
+        name: newMealName.trim(),
+        servings: Number(newMealServings) || 2,
+        recipeId,
+      })
+    },
+    onMutate: async () => {
+      if (!editingMeal) return
+      await queryClient.cancelQueries({ queryKey: ['meals'] })
+      const previous = queryClient.getQueryData<MealWithRecipe[]>(['meals'])
+      const linkedRecipe = newMealRecipeId
+        ? (recipes.find((r) => r.id === Number(newMealRecipeId)) ?? null)
+        : null
+      queryClient.setQueryData<MealWithRecipe[]>(['meals'], (old) =>
+        (old ?? []).map((m) =>
+          m.id === editingMeal.id
+            ? {
+                ...m,
+                name: newMealName.trim(),
+                servings: Number(newMealServings) || 2,
+                recipeId: newMealRecipeId ? Number(newMealRecipeId) : null,
+                recipe: linkedRecipe,
+              }
+            : m
+        )
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['meals'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] })
+      resetForm()
     },
   })
 
@@ -141,7 +201,10 @@ export function MealCalendar({
         const isYesterday = idx === 0
 
         return (
-          <div key={day.toISOString()} className="rounded-lg border overflow-hidden">
+          <div
+            key={day.toISOString()}
+            className="rounded-lg border overflow-hidden"
+          >
             {/* Day header */}
             <div
               className={`flex items-center justify-between px-4 py-2 ${
@@ -160,7 +223,9 @@ export function MealCalendar({
                 </span>
                 <span
                   className={`ml-2 text-xs ${
-                    isToday ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    isToday
+                      ? 'text-primary-foreground/70'
+                      : 'text-muted-foreground'
                   }`}
                 >
                   {format(day, 'MMM d')}
@@ -203,14 +268,24 @@ export function MealCalendar({
                         )}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      onClick={() => deleteMealMutation.mutate(meal.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                        onClick={() => openEditDialog(meal)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                        onClick={() => deleteMealMutation.mutate(meal.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -229,18 +304,13 @@ export function MealCalendar({
         )
       })}
 
-      {/* Add meal dialog */}
-      <Dialog
-        open={addMealDate !== null}
-        onOpenChange={(open) => !open && setAddMealDate(null)}
-      >
+      {/* Add / Edit meal dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => !open && resetForm()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Add Meal —{' '}
-              {addMealDate
-                ? format(addMealDate, 'EEEE, MMM d')
-                : ''}
+              {isEditing ? 'Edit Meal' : 'Add Meal'} —{' '}
+              {dialogDate ? format(new Date(dialogDate), 'EEEE, MMM d') : ''}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -256,28 +326,42 @@ export function MealCalendar({
                 }}
                 autoFocus
               />
-              {recipeSearch && filteredRecipes.length > 0 && !newMealRecipeId && (
-                <div className="border rounded-md overflow-hidden max-h-40 overflow-y-auto">
-                  {filteredRecipes.map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors"
-                      onClick={() => {
-                        setNewMealRecipeId(String(r.id))
-                        setNewMealName(r.name)
-                        setRecipeSearch(r.name)
-                      }}
-                    >
-                      {r.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {recipeSearch &&
+                filteredRecipes.length > 0 &&
+                !newMealRecipeId && (
+                  <div className="border rounded-md overflow-hidden max-h-40 overflow-y-auto">
+                    {filteredRecipes.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                        onClick={() => {
+                          setNewMealRecipeId(String(r.id))
+                          setNewMealName(r.name)
+                          setRecipeSearch(r.name)
+                        }}
+                      >
+                        {r.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               {newMealRecipeId && (
-                <p className="text-xs text-muted-foreground">
-                  ✓ Linked to recipe
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    ✓ Linked to recipe
+                  </p>
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground underline hover:text-foreground transition-colors"
+                    onClick={() => {
+                      setNewMealRecipeId('')
+                      setRecipeSearch('')
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
               )}
             </div>
             <div className="space-y-2">
@@ -303,18 +387,30 @@ export function MealCalendar({
           </div>
           <Separator />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setAddMealDate(null)}>
+            <Button variant="ghost" onClick={resetForm}>
               Cancel
             </Button>
-            <Button
-              onClick={() => addMealMutation.mutate()}
-              disabled={!newMealName.trim() || addMealMutation.isPending}
-            >
-              {addMealMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : null}
-              Add Meal
-            </Button>
+            {isEditing ? (
+              <Button
+                onClick={() => updateMealMutation.mutate()}
+                disabled={!newMealName.trim() || updateMealMutation.isPending}
+              >
+                {updateMealMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Save Changes
+              </Button>
+            ) : (
+              <Button
+                onClick={() => addMealMutation.mutate()}
+                disabled={!newMealName.trim() || addMealMutation.isPending}
+              >
+                {addMealMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Add Meal
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
