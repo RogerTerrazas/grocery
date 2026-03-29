@@ -29,18 +29,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="flex h-full flex-col bg-background text-foreground">
+      <body className="flex min-h-screen flex-col bg-background text-foreground md:h-screen">
         <QueryProvider>
-          <div className="flex h-full min-h-screen flex-col md:flex-row">
+          <div className="flex min-h-screen flex-col md:h-screen md:flex-row">
             {/* Sidebar on desktop, bottom bar on mobile */}
             <aside className="md:w-52 md:shrink-0 md:border-r">
               <Nav />
             </aside>
 
             {/* Main content */}
-            <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+            <main className="flex-1 pb-20 md:overflow-y-auto md:pb-0">
               {children}
             </main>
           </div>
