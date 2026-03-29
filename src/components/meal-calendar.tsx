@@ -60,7 +60,33 @@ export function MealCalendar({
         ...(recipeId !== undefined ? { recipeId } : {}),
       })
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      if (!addMealDate) return
+      await queryClient.cancelQueries({ queryKey: ['meals'] })
+      const previous = queryClient.getQueryData<MealWithRecipe[]>(['meals'])
+      const linkedRecipe = newMealRecipeId
+        ? (recipes.find((r) => r.id === Number(newMealRecipeId)) ?? null)
+        : null
+      queryClient.setQueryData<MealWithRecipe[]>(['meals'], (old) => [
+        ...(old ?? []),
+        {
+          id: Date.now(),
+          name: newMealName.trim(),
+          servings: Number(newMealServings) || 2,
+          date: addMealDate,
+          recipeId: newMealRecipeId ? Number(newMealRecipeId) : null,
+          createdAt: new Date(),
+          recipe: linkedRecipe,
+        },
+      ])
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['meals'], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['meals'] })
       setAddMealDate(null)
       setNewMealName('')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -33,6 +33,7 @@ interface RecipeDetailProps {
 
 export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [recipe, setRecipe] = useState(initialRecipe)
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState(recipe.name)
@@ -44,6 +45,8 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
     onSuccess: () => {
       setRecipe((r) => ({ ...r, name: editName }))
       setIsEditingName(false)
+      // Keep the recipes list in sync
+      queryClient.invalidateQueries({ queryKey: ['recipes'] })
     },
   })
 
@@ -70,6 +73,7 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
         ],
       }))
       setNewIngredient('')
+      queryClient.invalidateQueries({ queryKey: ['groceries'] })
     },
   })
 
@@ -77,12 +81,16 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
     mutationFn: ({ id, checked }: { id: number; checked: boolean }) =>
       toggleGroceryItem(id, checked),
     onMutate: ({ id, checked }) => {
+      // Optimistic local update
       setRecipe((r) => ({
         ...r,
         groceryItems: r.groceryItems.map((i) =>
           i.id === id ? { ...i, checked, checkedAt: checked ? new Date() : null } : i
         ),
       }))
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['groceries'] })
     },
   })
 
@@ -93,6 +101,7 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
         ...r,
         groceryItems: r.groceryItems.filter((i) => i.id !== id),
       }))
+      queryClient.invalidateQueries({ queryKey: ['groceries'] })
     },
   })
 
