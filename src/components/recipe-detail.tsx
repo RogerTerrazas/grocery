@@ -6,12 +6,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { createGroceryItem, deleteGroceryItem } from '@/actions/groceries'
+import { createGroceryItem, deleteGroceryItem, toggleGroceryItem } from '@/actions/groceries'
 import { deleteRecipe, updateRecipe } from '@/actions/recipes'
 import type { GroceryItem, Recipe } from '@/db/schema'
+import { cn } from '@/lib/utils'
 
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
+import { Checkbox } from './ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -52,7 +54,7 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
 
   const addIngredientMutation = useMutation({
     mutationFn: () =>
-      createGroceryItem({ name: newIngredient, recipeId: recipe.id }),
+      createGroceryItem({ name: newIngredient.trim(), recipeId: recipe.id }),
     onSuccess: () => {
       setRecipe((r) => ({
         ...r,
@@ -60,7 +62,7 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
           ...r.groceryItems,
           {
             id: Date.now(),
-            name: newIngredient,
+            name: newIngredient.trim(),
             recipeId: recipe.id,
             checked: false,
             checkedAt: null,
@@ -68,6 +70,19 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
         ],
       }))
       setNewIngredient('')
+    },
+  })
+
+  const toggleIngredientMutation = useMutation({
+    mutationFn: ({ id, checked }: { id: number; checked: boolean }) =>
+      toggleGroceryItem(id, checked),
+    onMutate: ({ id, checked }) => {
+      setRecipe((r) => ({
+        ...r,
+        groceryItems: r.groceryItems.map((i) =>
+          i.id === id ? { ...i, checked, checkedAt: checked ? new Date() : null } : i
+        ),
+      }))
     },
   })
 
@@ -86,6 +101,9 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
     if (!newIngredient.trim()) return
     addIngredientMutation.mutate()
   }
+
+  const onList = recipe.groceryItems.filter((i) => !i.checked).length
+  const checked = recipe.groceryItems.filter((i) => i.checked).length
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto w-full">
@@ -151,7 +169,16 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Ingredients
           </h2>
-          <Badge variant="secondary">{recipe.groceryItems.length}</Badge>
+          <div className="flex items-center gap-2">
+            {onList > 0 && (
+              <Badge variant="secondary">{onList} on grocery list</Badge>
+            )}
+            {checked > 0 && (
+              <Badge variant="outline" className="text-muted-foreground">
+                {checked} checked off
+              </Badge>
+            )}
+          </div>
         </div>
 
         {recipe.groceryItems.length === 0 ? (
@@ -163,9 +190,28 @@ export function RecipeDetail({ recipe: initialRecipe }: RecipeDetailProps) {
             {recipe.groceryItems.map((item) => (
               <div
                 key={item.id}
-                className="group flex items-center justify-between rounded-lg px-3 py-2 hover:bg-secondary/50"
+                className={cn(
+                  'group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary/50',
+                  item.checked && 'opacity-50'
+                )}
               >
-                <span className="text-sm">{item.name}</span>
+                <Checkbox
+                  checked={item.checked}
+                  onCheckedChange={(val) =>
+                    toggleIngredientMutation.mutate({
+                      id: item.id,
+                      checked: val === true,
+                    })
+                  }
+                />
+                <span
+                  className={cn(
+                    'flex-1 text-sm',
+                    item.checked && 'line-through text-muted-foreground'
+                  )}
+                >
+                  {item.name}
+                </span>
                 <Button
                   variant="ghost"
                   size="icon"
