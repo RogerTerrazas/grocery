@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader2, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { Loader2, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { startTransition, useState } from 'react'
 
@@ -11,6 +11,7 @@ import {
   toggleGroceryItem,
 } from '@/actions/groceries'
 import { categorizeGroceryItemsAction } from '@/actions/groceries-ai'
+import type { GroceryCategory } from '@/lib/ai'
 import type { GroceryItem, Recipe } from '@/db/schema'
 import { cn } from '@/lib/utils'
 
@@ -24,22 +25,41 @@ type GroceryItemWithRecipe = GroceryItem & { recipe: Recipe | null }
 
 interface GroceryListProps {
   initialItems: GroceryItemWithRecipe[]
-  recipes?: Recipe[]
+  initialCategories: GroceryCategory[]
 }
 
-export function GroceryList({ initialItems }: GroceryListProps) {
+export function GroceryList({
+  initialItems,
+  initialCategories,
+}: GroceryListProps) {
   const queryClient = useQueryClient()
   const [newItemName, setNewItemName] = useState('')
-  const [isCategorizing, setIsCategorizing] = useState(false)
-  const [categories, setCategories] = useState<
-    { name: string; items: string[] }[] | null
-  >(null)
 
   const { data: items } = useQuery({
     queryKey: ['groceries'],
     queryFn: async () => initialItems,
     initialData: initialItems,
   })
+
+  // Categories are derived from unchecked item names — re-fetched any time
+  // the grocery list changes
+  const uncheckedItems = items.filter((i) => !i.checked)
+  const uncheckedNames = uncheckedItems.map((i) => i.name)
+
+  const { data: categories, isFetching: isRecategorizing } = useQuery({
+    queryKey: ['grocery-categories', uncheckedNames],
+    queryFn: () => categorizeGroceryItemsAction(uncheckedNames),
+    initialData: initialCategories,
+    // Only re-run when names actually change, not on every render
+    staleTime: Number.POSITIVE_INFINITY,
+  })
+
+  const checkedItems = items
+    .filter((i) => i.checked)
+    .sort(
+      (a, b) =>
+        (b.checkedAt?.getTime() ?? 0) - (a.checkedAt?.getTime() ?? 0)
+    )
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, checked }: { id: number; checked: boolean }) =>
@@ -93,36 +113,15 @@ export function GroceryList({ initialItems }: GroceryListProps) {
     },
   })
 
-  const uncheckedItems = items.filter((i) => !i.checked)
-  const checkedItems = items
-    .filter((i) => i.checked)
-    .sort(
-      (a, b) =>
-        (b.checkedAt?.getTime() ?? 0) - (a.checkedAt?.getTime() ?? 0)
-    )
-
   async function handleAddItem(e: React.FormEvent) {
     e.preventDefault()
     const name = newItemName.trim()
     if (!name) return
     setNewItemName('')
-    setCategories(null)
     startTransition(async () => {
       await createGroceryItem({ name })
       queryClient.invalidateQueries({ queryKey: ['groceries'] })
     })
-  }
-
-  async function handleCategorize() {
-    const uncheckedNames = uncheckedItems.map((i) => i.name)
-    if (uncheckedNames.length === 0) return
-    setIsCategorizing(true)
-    try {
-      const result = await categorizeGroceryItemsAction(uncheckedNames)
-      setCategories(result)
-    } finally {
-      setIsCategorizing(false)
-    }
   }
 
   return (
@@ -140,39 +139,41 @@ export function GroceryList({ initialItems }: GroceryListProps) {
         </Button>
       </form>
 
-      {/* AI categorize button */}
-      {uncheckedItems.length > 1 && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCategorize}
-          disabled={isCategorizing}
-          className="w-full gap-2"
-        >
-          {isCategorizing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}
-          {isCategorizing ? 'Categorizing...' : 'Categorize with AI'}
-        </Button>
+      {/* Re-categorizing indicator */}
+      {isRecategorizing && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Updating categories…
+        </div>
       )}
 
-      {/* Categorized view */}
-      {categories ? (
+      {/* Categorized unchecked items */}
+      {uncheckedItems.length === 0 && checkedItems.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <ShoppingCartEmpty />
+          <p className="mt-2 text-sm">Your grocery list is empty</p>
+          <p className="text-xs mt-1">Add items above to get started</p>
+        </div>
+      ) : uncheckedItems.length > 0 ? (
         <div className="space-y-4">
-          {categories.map((cat) => (
-            <div key={cat.name}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                {cat.name}
-              </h3>
-              <div className="space-y-1">
-                {cat.items.map((itemName) => {
-                  const item = uncheckedItems.find(
-                    (i) => i.name.toLowerCase() === itemName.toLowerCase()
-                  )
-                  if (!item) return null
-                  return (
+          {categories.map((cat) => {
+            const catItems = cat.items
+              .map((itemName) =>
+                uncheckedItems.find(
+                  (i) => i.name.toLowerCase() === itemName.toLowerCase()
+                )
+              )
+              .filter((item): item is GroceryItemWithRecipe => item !== undefined)
+
+            if (catItems.length === 0) return null
+
+            return (
+              <div key={cat.name}>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                  {cat.name}
+                </h3>
+                <div className="space-y-1">
+                  {catItems.map((item) => (
                     <GroceryItemRow
                       key={item.id}
                       item={item}
@@ -181,34 +182,49 @@ export function GroceryList({ initialItems }: GroceryListProps) {
                       }
                       onDelete={() => deleteMutation.mutate(item.id)}
                     />
-                  )
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
+          {/* Fallback: items not matched by any category */}
+          {(() => {
+            const categorizedNames = new Set(
+              categories.flatMap((c) => c.items.map((n) => n.toLowerCase()))
+            )
+            const uncategorized = uncheckedItems.filter(
+              (i) => !categorizedNames.has(i.name.toLowerCase())
+            )
+            if (uncategorized.length === 0) return null
+            return (
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                  Other
+                </h3>
+                <div className="space-y-1">
+                  {uncategorized.map((item) => (
+                    <GroceryItemRow
+                      key={item.id}
+                      item={item}
+                      onToggle={(checked) =>
+                        toggleMutation.mutate({ id: item.id, checked })
+                      }
+                      onDelete={() => deleteMutation.mutate(item.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
         </div>
-      ) : (
-        /* Default flat list */
-        <div className="space-y-1">
-          {uncheckedItems.map((item) => (
-            <GroceryItemRow
-              key={item.id}
-              item={item}
-              onToggle={(checked) =>
-                toggleMutation.mutate({ id: item.id, checked })
-              }
-              onDelete={() => deleteMutation.mutate(item.id)}
-            />
-          ))}
-        </div>
-      )}
+      ) : null}
 
       {/* Recently completed */}
       {checkedItems.length > 0 && (
         <>
           <Separator />
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
               Recently Completed
             </h3>
             <div className="space-y-1">
@@ -225,14 +241,6 @@ export function GroceryList({ initialItems }: GroceryListProps) {
             </div>
           </div>
         </>
-      )}
-
-      {items.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <ShoppingCartEmpty />
-          <p className="mt-2 text-sm">Your grocery list is empty</p>
-          <p className="text-xs mt-1">Add items above to get started</p>
-        </div>
       )}
     </div>
   )

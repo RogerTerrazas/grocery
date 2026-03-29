@@ -1,11 +1,11 @@
 import { generateObject } from 'ai'
 import { z } from 'zod'
 
-// Vercel AI Gateway — routes to Anthropic Claude Sonnet
+// Vercel AI Gateway — routes to Anthropic Claude Haiku 3.5
 // Requires AI_GATEWAY_API_KEY env var
 function getModel() {
   // @ts-ignore
-  return 'anthropic/claude-sonnet-4-5' as const
+  return 'anthropic/claude-haiku-3-5' as const
 }
 
 const recipeSchema = z.object({
