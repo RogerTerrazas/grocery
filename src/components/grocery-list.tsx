@@ -12,8 +12,8 @@ import {
   toggleGroceryItem,
 } from '@/actions/groceries'
 import { categorizeGroceryItemsAction } from '@/actions/groceries-ai'
-import type { GroceryCategory } from '@/lib/ai'
 import type { GroceryItem, Recipe } from '@/db/schema'
+import type { GroceryCategory } from '@/lib/ai'
 import { cn } from '@/lib/utils'
 
 import { Badge } from './ui/badge'
@@ -46,7 +46,10 @@ export function GroceryList({
   // the grocery list changes
   const uncheckedItems = items.filter((i) => !i.checked)
   // Stable serialised key so React Query only refetches when names actually change
-  const uncheckedNamesKey = uncheckedItems.map((i) => i.name).sort().join('|')
+  const uncheckedNamesKey = uncheckedItems
+    .map((i) => i.name)
+    .sort()
+    .join('|')
 
   const { data: categories, isFetching: isRecategorizing } = useQuery({
     queryKey: ['grocery-categories', uncheckedNamesKey],
@@ -91,8 +94,7 @@ export function GroceryList({
   const checkedItems = items
     .filter((i) => i.checked)
     .sort(
-      (a, b) =>
-        (b.checkedAt?.getTime() ?? 0) - (a.checkedAt?.getTime() ?? 0)
+      (a, b) => (b.checkedAt?.getTime() ?? 0) - (a.checkedAt?.getTime() ?? 0)
     )
 
   const toggleMutation = useMutation({
@@ -267,6 +269,8 @@ function GroceryItemRow({
   onToggle: (checked: boolean) => void
   onDelete: () => void
 }) {
+  const isLinkedToRecipe = item.recipe !== null
+
   return (
     <div
       className={cn(
@@ -298,14 +302,16 @@ function GroceryItemRow({
           </Link>
         )}
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-        onClick={onDelete}
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </Button>
+      {!isLinkedToRecipe && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+          onClick={onDelete}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      )}
     </div>
   )
 }
